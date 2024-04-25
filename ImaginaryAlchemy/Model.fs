@@ -26,7 +26,9 @@ module Model =
                 min conceptA conceptB,
                 max conceptA conceptB
             let text =
-                $"The following is a list of imaginary alchemy experiments. Each experiment combines two concepts into a new concept creatively. The results is always exactly one word, even if it seems like there is no single word that represents the combined concept.\n> Fire + Water = Steam\n> {conceptA} + {conceptB} = "
+                $"""The following is a list of imaginary alchemy experiments. Each experiment combines two concepts into a new concept. The resulting concept is always a single word.
+> Fire + Water = Steam
+> {conceptA} + {conceptB} = """.Replace("\r", "")
             let concept =
                 executor.InferAsync(text, inferenceParams)
                     |> AsyncSeq.ofAsyncEnum
@@ -38,5 +40,9 @@ module Model =
                     concept.Substring(0, concept.Length - antiPrompt.Length)
                 else concept
             let concept = concept.Trim()
-            if concept.Contains(' ') then None
+            if concept.Contains(' ') then
+                printfn ""
+                printfn $"*** Rejected {concept} = {conceptA} + {conceptB}"
+                printfn ""
+                None
             else Some concept
