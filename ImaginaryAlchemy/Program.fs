@@ -45,12 +45,12 @@ module Program =
                 let second = pickOne terms
                 if first <= second then first, second
                 else second, first
-            if asked.Contains(first, second) then
+            if first = second || asked.Contains(first, second) then
                 loop ()
             else
                 first, second
 
-        if asked.Count < (terms.Length * (terms.Length + 1)) / 2 then
+        if asked.Count < (terms.Length * (terms.Length - 1)) / 2 then
             loop ()
         else
             failwith "No remaining combinations"
@@ -96,8 +96,11 @@ module Program =
         let asked', termMap' = increment asked termMap
         loop asked' termMap'
 
-    Console.OutputEncoding <- System.Text.Encoding.UTF8
-    [ "Water"; "Fire"; "Wind"; "Earth" ]
-        |> Seq.map (fun term -> term, None)
-        |> Map
-        |> loop Set.empty
+    try
+        Console.OutputEncoding <- System.Text.Encoding.UTF8
+        [ "Water"; "Fire"; "Wind"; "Earth" ]
+            |> Seq.map (fun term -> term, None)
+            |> Map
+            |> loop Set.empty
+    with exn ->
+        printfn $"{exn.Message}"
