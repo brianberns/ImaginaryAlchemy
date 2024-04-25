@@ -1,5 +1,7 @@
 ﻿namespace LlamaSharpTest
 
+open System
+
 open FSharp.Control
 
 open LLama.Common
@@ -40,9 +42,10 @@ module Model =
                     concept.Substring(0, concept.Length - antiPrompt.Length)
                 else concept
             let concept = concept.Trim()
-            if concept.Contains(' ') then
+            if Seq.forall Char.IsLetter concept then
+                Some concept
+            else
                 printfn ""
                 printfn $"*** Rejected {concept} = {conceptA} + {conceptB}"
                 printfn ""
                 None
-            else Some concept

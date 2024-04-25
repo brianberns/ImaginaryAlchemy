@@ -32,7 +32,7 @@ module Program =
             |> Seq.toArray
 
     let pickOne =
-        let rng = Random(1)
+        let rng = Random(0)
         fun (terms : _[]) ->
             let idx = rng.Next(terms.Length)
             terms[idx]
