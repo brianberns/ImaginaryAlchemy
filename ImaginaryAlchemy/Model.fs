@@ -1,4 +1,4 @@
-﻿namespace LlamaSharpTest
+﻿namespace ImaginaryAlchemy
 
 open System
 

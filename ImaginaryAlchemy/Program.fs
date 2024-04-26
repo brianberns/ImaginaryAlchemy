@@ -1,4 +1,4 @@
-﻿namespace LlamaSharpTest
+﻿namespace ImaginaryAlchemy
 
 open System
 
@@ -22,8 +22,7 @@ module Program =
             let first, second =
                 let first = pickOne terms
                 let second = pickOne terms
-                if first <= second then first, second
-                else second, first
+                min first second, max first second
             if first = second || asked.Contains(first, second) then
                 loop ()
             else
@@ -56,7 +55,6 @@ module Program =
         Console.ForegroundColor <- ConsoleColor.White
 
     let increment (asked : Set<Term * Term>) (termMap : TermMap) =
-        // Console.ReadLine() |> ignore
         let first, second =
             let terms = Seq.toArray termMap.Keys
             pickTwo asked terms
