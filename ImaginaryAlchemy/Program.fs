@@ -73,7 +73,7 @@ module Program =
         Console.ForegroundColor <- ConsoleColor.White
 
     let increment (asked : Set<Term * Term>) (termMap : TermMap) =
-        System.Threading.Thread.Sleep(3000)
+        // Console.ReadLine() |> ignore
         let first, second =
             let terms = Seq.toArray termMap.Keys
             pickTwo asked terms
@@ -95,9 +95,16 @@ module Program =
 
     try
         Console.OutputEncoding <- System.Text.Encoding.UTF8
-        [ "Water"; "Fire"; "Wind"; "Earth" ]
-            |> Seq.map (fun term -> term, None)
-            |> Map
-            |> loop Set.empty
+        let asked =
+            set [ "Fire", "Water" ]
+        let termMap =
+            Map [
+                "Earth", None
+                "Fire", None
+                "Water", None
+                "Wind", None
+                "Steam", Some ("Fire", "Water")
+            ]
+        loop asked termMap
     with exn ->
         printfn $"{exn.Message}"
