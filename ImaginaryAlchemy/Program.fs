@@ -39,30 +39,47 @@ module Inventory =
         }
 
     let iterate inv =
+
         let allTerms =
             keySet inv.OldTermMap
                 + keySet inv.NewTermMap
+
         let pairs =
             seq {
                 for newTerm in inv.NewTermMap.Keys do
                     for term in allTerms do
                         yield newTerm, term
             }
+
         let oldTermMap =
             Map [
                 yield! Map.toSeq inv.OldTermMap
                 yield! Map.toSeq inv.NewTermMap
             ]
+
+        let accept (term : Term) (terms : Set<_>) =
+            if terms.Contains(term) then
+                false
+            elif term.EndsWith("es") then
+                if terms.Contains(term.Substring(0, term.Length-2)) then
+                    false
+                else true
+            elif term.EndsWith("s") then
+                if terms.Contains(term.Substring(0, term.Length-1)) then
+                    false
+                else true
+            else true
+
         let newTermMap =
             (Map.empty, pairs)
                 ||> Seq.fold (fun acc (first, second) ->
                     match Model.combine first second with
                         | Some term when
-                            allTerms
-                                |> Set.contains term
-                                |> not ->
+                            accept term allTerms
+                                && accept term (keySet acc) ->
                             acc.Add(term, Some (first, second))
                         | _ -> acc)
+
         create oldTermMap newTermMap
 
     let dump inv =
