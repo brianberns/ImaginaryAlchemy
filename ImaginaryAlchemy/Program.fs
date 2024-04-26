@@ -45,10 +45,14 @@ module Inventory =
                 + keySet inv.NewTermMap
 
         let pairs =
+            let newTerms = Seq.toArray inv.NewTermMap.Keys
             seq {
-                for newTerm in inv.NewTermMap.Keys do
-                    for term in allTerms do
+                for i = 0 to newTerms.Length - 1 do
+                    let newTerm = newTerms[i]
+                    for term in inv.OldTermMap.Keys do
                         yield newTerm, term
+                    for j = i+1 to newTerms.Length - 1 do
+                        yield newTerm, newTerms[j]
             }
 
         let oldTermMap =
