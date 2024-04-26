@@ -80,6 +80,13 @@ module Inventory =
             printfn $"{term} = {first} + {second}"
         Console.ForegroundColor <- ConsoleColor.White
 
+    let rec explore inv =
+        let inv' = iterate inv
+        if not inv'.NewTermMap.IsEmpty then
+            printfn ""
+            dump inv'
+            explore inv'
+
 module Program =
 
     let inv =
@@ -98,6 +105,6 @@ module Program =
 
     Console.OutputEncoding <- System.Text.Encoding.UTF8
     try
-        Inventory.iterate inv |> Inventory.dump
+        Inventory.explore inv
     with exn ->
         printfn $"{exn.Message}"
