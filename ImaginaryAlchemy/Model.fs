@@ -28,7 +28,7 @@ module Model =
                 min conceptA conceptB,
                 max conceptA conceptB
             let text =
-                $"""The following is a list of imaginary alchemy experiments. Each experiment combines two concepts into a new concept. The new concept is always one word. The new concept is always a singular noun.
+                $"""The following is a list of imaginary alchemy experiments. Each experiment combines two concepts into a new concept. The new concept is always one word. The new concept is always a singular noun. The new concept is always a dictionary word.
 > Fire + Water = Steam
 > {conceptA} + {conceptB} = """.Replace("\r", "")
             let concept =
@@ -46,7 +46,7 @@ module Model =
             if Seq.forall Char.IsLetter concept
                 && concept <> conceptA
                 && concept <> conceptB
-                && concept <> "Nothing" then
+                && concept <> "" then
                 Some concept
             else
                 Console.ForegroundColor <- ConsoleColor.Red
