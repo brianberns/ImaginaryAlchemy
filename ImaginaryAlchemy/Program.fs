@@ -8,23 +8,6 @@ type TermMap = Map<Term (*result*), Option<Term (*first*) * Term (*second*)>>
 
 module Program =
 
-    let getMessages exn =
-
-        let rec loop (exn : exn) =
-            seq {
-                match exn with
-                    | :? AggregateException as aggExn ->
-                        for innerExn in aggExn.InnerExceptions do
-                            yield! loop innerExn
-                    | _ ->
-                        if not (isNull exn.InnerException) then
-                            yield! loop exn.InnerException
-                yield exn.Message
-            }
-
-        loop exn
-            |> Seq.toArray
-
     let rng = Random(0)
 
     let pickOne terms =
@@ -99,10 +82,10 @@ module Program =
             set [ "Fire", "Water" ]
         let termMap =
             Map [
-                "Earth", None
                 "Fire", None
                 "Water", None
-                "Wind", None
+                "Stone", None
+                "Wood", None
                 "Steam", Some ("Fire", "Water")
             ]
         loop asked termMap
