@@ -79,7 +79,7 @@ module Program =
             pickTwo asked terms
         let asked' = asked.Add(first, second)
         match Model.combine first second with
-            | Some term ->
+            | Some term when not (termMap.ContainsKey(term)) ->
                 let termMap' =
                     Map.add
                         term
@@ -87,7 +87,7 @@ module Program =
                         termMap
                 dump term termMap'
                 asked', termMap'
-            | None -> asked', termMap
+            | _ -> asked', termMap
 
     let rec loop asked termMap : unit =
         let asked', termMap' = increment asked termMap
