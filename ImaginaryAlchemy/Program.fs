@@ -4,12 +4,6 @@ open System
 
 type Term = string
 
-type Response =
-    {
-        Result : Term
-        IsNew : bool
-    }
-
 type TermMap = Map<Term (*result*), Option<Term (*first*) * Term (*second*)>>
 
 module Program =
@@ -31,11 +25,13 @@ module Program =
         loop exn
             |> Seq.toArray
 
-    let pickOne =
-        let rng = Random(0)
-        fun (terms : _[]) ->
-            let idx = rng.Next(terms.Length)
-            terms[idx]
+    let rng = Random(0)
+
+    let pickOne terms =
+        terms
+            |> Array.length
+            |> rng.Next
+            |> Array.get terms
 
     let pickTwo (asked : Set<_>) (terms : _[]) =
 
@@ -77,6 +73,7 @@ module Program =
         Console.ForegroundColor <- ConsoleColor.White
 
     let increment (asked : Set<Term * Term>) (termMap : TermMap) =
+        System.Threading.Thread.Sleep(3000)
         let first, second =
             let terms = Seq.toArray termMap.Keys
             pickTwo asked terms
