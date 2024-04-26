@@ -9,7 +9,7 @@ open LLama
 
 module Model =
 
-    let private modelPath = @"C:\Users\brian\source\repos\ImaginaryAlchemy\ImaginaryAlchemy\llama-2-7b-chat.Q3_K_S.gguf"
+    let private modelPath = @"C:\Users\brian\source\repos\ImaginaryAlchemy\ImaginaryAlchemy\llama-2-7b-chat.Q4_K_M.gguf"
     let private parameters = ModelParams(modelPath, GpuLayerCount = 100)
     let private model = LLamaWeights.LoadFromFile(parameters)
     let private executor = StatelessExecutor(model, parameters)
