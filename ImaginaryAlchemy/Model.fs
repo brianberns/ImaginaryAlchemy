@@ -49,11 +49,11 @@ module Model =
                 if concept.EndsWith(antiPrompt) then
                     concept.Substring(0, concept.Length - antiPrompt.Length)
                 else concept
-            let concept = concept.Trim()
+            let concept = concept.Trim().ToLower()
+            let concept = concept[0..0].ToUpper() + concept[1..]
             if Concept.all.Contains(concept.ToLower())
                 && concept <> conceptA
                 && concept <> conceptB then
-                let concept = concept[0..0].ToUpper() + concept[1..].ToLower()
                 Some concept
             else
                 Console.ForegroundColor <- ConsoleColor.Red
