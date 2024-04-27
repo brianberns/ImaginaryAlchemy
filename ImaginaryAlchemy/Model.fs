@@ -28,6 +28,11 @@ module Model =
             AntiPrompts = [antiPrompt],
             MaxTokens = 10)
 
+    let wtr =
+        let wtr = new System.IO.StreamWriter("output.txt")
+        wtr.AutoFlush <- true
+        wtr
+
     let combine (conceptA : string) (conceptB : string) =
         if conceptA = conceptB then
             Some conceptA
@@ -56,9 +61,7 @@ module Model =
                 && concept <> conceptB then
                 Some concept
             else
-                Console.ForegroundColor <- ConsoleColor.Red
-                printfn ""
-                printfn $"*** Rejected {concept} = {conceptA} + {conceptB}"
-                printfn ""
-                Console.ForegroundColor <- ConsoleColor.White
+                fprintfn wtr ""
+                fprintfn wtr $"*** Rejected {concept} = {conceptA} + {conceptB}"
+                fprintfn wtr ""
                 None

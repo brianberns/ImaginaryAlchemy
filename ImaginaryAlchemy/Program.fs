@@ -98,15 +98,13 @@ module Inventory =
                         |> Option.map (fun pair ->
                             term, pair))
 
-        Console.ForegroundColor <- ConsoleColor.Green
         for term, (first, second) in entries do
-            printfn $"{term} = {first} + {second}"
-        Console.ForegroundColor <- ConsoleColor.White
+            fprintfn Model.wtr $"{term} = {first} + {second}"
 
     let rec explore inv =
         let inv' = iterate inv
         if not inv'.NewTermMap.IsEmpty then
-            printfn ""
+            fprintfn Model.wtr ""
             dump inv'
             explore inv'
 
@@ -126,7 +124,6 @@ module Program =
             ]
         Inventory.create oldTermMap newTermMap
 
-    Console.OutputEncoding <- System.Text.Encoding.UTF8
     try
         Inventory.explore inv
     with exn ->
