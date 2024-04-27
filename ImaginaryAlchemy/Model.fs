@@ -7,6 +7,14 @@ open FSharp.Control
 open LLama.Common
 open LLama
 
+// https://www.reddit.com/r/learnprogramming/comments/4yoap9/large_word_list_of_english_nouns/
+module Concept =
+
+    let all =
+        System.IO.File.ReadLines("nouns.txt")
+            |> Seq.map _.ToLower()
+            |> set
+
 module Model =
 
     let private modelPath = @"C:\Users\brian\source\repos\ImaginaryAlchemy\ImaginaryAlchemy\llama-2-7b-chat.Q4_K_M.gguf"
@@ -28,7 +36,7 @@ module Model =
                 min conceptA conceptB,
                 max conceptA conceptB
             let text =
-                $"""The following is a list of imaginary alchemy experiments. Each experiment combines two concepts into a new concept. The new concept is always one word. The new concept is always a singular noun. The new concept is always a dictionary word.
+                $"""The following is a list of imaginary alchemy experiments. Each experiment combines two concepts into a new concept. The new concept is always a singular noun.
 > Fire + Water = Steam
 > {conceptA} + {conceptB} = """.Replace("\r", "")
             let concept =
@@ -42,11 +50,10 @@ module Model =
                     concept.Substring(0, concept.Length - antiPrompt.Length)
                 else concept
             let concept = concept.Trim()
-            let concept = concept[0..0].ToUpper() + concept[1..].ToLower()
-            if Seq.forall Char.IsLetter concept
+            if Concept.all.Contains(concept.ToLower())
                 && concept <> conceptA
-                && concept <> conceptB
-                && concept <> "" then
+                && concept <> conceptB then
+                let concept = concept[0..0].ToUpper() + concept[1..].ToLower()
                 Some concept
             else
                 Console.ForegroundColor <- ConsoleColor.Red

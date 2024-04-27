@@ -55,7 +55,7 @@ module Inventory =
                         yield newTerm, newTerms[j]
             }
                 |> Seq.sortBy (fun _ -> Guid.NewGuid())
-                |> Seq.truncate 100
+                |> Seq.truncate 1000
 
         let oldTermMap =
             Map [
