@@ -61,7 +61,5 @@ module Model =
                 && concept <> conceptB then
                 Some concept
             else
-                fprintfn wtr ""
                 fprintfn wtr $"*** Rejected {concept} = {conceptA} + {conceptB}"
-                fprintfn wtr ""
                 None
