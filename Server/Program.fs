@@ -15,7 +15,10 @@ module Program =
                 Oracle.combine conceptA conceptB
             return conceptOpt
                 |> Option.map (fun concept ->
-                    concept, 0)
+                    {
+                        Concept = concept
+                        Generation = 0
+                    })
         }
 
     let alchemyApi : IAlchemyApi =
@@ -40,7 +43,6 @@ module Program =
         let config =
             { defaultConfig with
                 bindings = [ HttpBinding.createSimple HTTP "127.0.0.1" 5000 ] }
-        // startWebServer config service
-        ()
+        startWebServer config service
 
     with exn -> printfn $"{exn.Message}"

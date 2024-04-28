@@ -2,7 +2,15 @@
 
 type Concept = string
 
+type ConceptInfo =
+    {
+        Concept : Concept
+        Generation : int
+    }
+
 type IAlchemyApi =
     {
-        Combine : (Concept * Concept) -> Async<Option<Concept * int>>
+        Combine :
+            (Concept * Concept) ->
+                Async<Option<ConceptInfo>>
     }

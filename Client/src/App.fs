@@ -5,22 +5,43 @@ open Elmish
 open Elmish.React
 open Feliz
 
-type Model = Model
+type Model = List<ConceptInfo>
 
 type Msg = Msg
 
 module Model =
 
-    let init () = Model, Cmd.none
+    let init () =
+        let model =
+            [
+                "Earth", 0
+                "Fire", 0
+                "Water", 0
+                "Air", 0
+                "Steam", 1
+            ] |> List.map (fun (concept, gen) ->
+                {
+                    Concept = concept
+                    Generation = gen
+                })
+        model, Cmd.none
 
-    let update msg Model =
+    let update msg model =
         match msg with
-            | Msg -> Model, Cmd.none
+            | Msg -> model, Cmd.none
 
 module View =
 
+    let renderConceptInfo info =
+        Html.div [
+            Html.span info.Concept
+            Html.span info.Generation
+        ]
+
     let render model dispatch =
-        Html.div []
+        model
+            |> Seq.map renderConceptInfo
+            |> Html.div
 
 module App =
 
