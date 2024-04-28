@@ -74,17 +74,21 @@ module Program =
                 Combine = uncurry Model.combine
             }
 
-        let logger = Targets.create LogLevel.Info [||]
-        let webApp =
+            // create the web service
+        let service : WebPart =
+            let logger = Targets.create LogLevel.Info [||]
             (Remoting.createApi()
                 |> Remoting.fromValue alchemyApi
                 |> Remoting.buildWebPart)
-                >=> Filters.logWithLevelStructured LogLevel.Info logger Filters.logFormatStructured
+                >=> Filters.logWithLevelStructured
+                    LogLevel.Info
+                    logger
+                    Filters.logFormatStructured
 
-        // start the web server
+            // start the web server
         let config =
             { defaultConfig with
                 bindings = [ HttpBinding.createSimple HTTP "127.0.0.1" 5000 ] }
-        startWebServer config webApp
+        startWebServer config service
 
     with exn -> printfn $"{exn.Message}"
