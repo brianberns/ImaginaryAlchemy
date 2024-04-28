@@ -12,7 +12,7 @@ module Program =
     let combine oracle (conceptA, conceptB) =
         async {
             let! conceptOpt =
-                Oracle.combine conceptA conceptB oracle
+                Oracle.combine oracle conceptA conceptB
             return conceptOpt
                 |> Option.map (fun concept ->
                     {
@@ -41,7 +41,7 @@ module Program =
             // start the web server
         let config =
             { defaultConfig with
-                bindings = [ HttpBinding.createSimple HTTP "127.0.0.1" 5000 ] }
+                bindings = [ HttpBinding.createSimple HTTP "localhost" 5000 ] }
         startWebServer config service
 
     with exn -> printfn $"{exn.Message}"

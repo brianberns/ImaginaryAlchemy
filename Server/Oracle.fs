@@ -54,7 +54,7 @@ module Oracle =
     let private normalize (name : string) =
         name[0..0].ToUpper() + name[1..].ToLower()
 
-    let combine (conceptA : string) (conceptB : string) oracle =
+    let combine oracle (conceptA : string) (conceptB : string) =
         let conceptA = normalize conceptA
         let conceptB = normalize conceptB
         if conceptA = conceptB then
