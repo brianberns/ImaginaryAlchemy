@@ -1,7 +1,26 @@
 namespace ImaginaryAlchemy
 
-open Browser.Dom
 open Fable.Remoting.Client
+open Elmish
+open Elmish.React
+open Feliz
+
+type Model = Model
+
+type Msg = Msg
+
+module Model =
+
+    let init () = Model, Cmd.none
+
+    let update msg Model =
+        match msg with
+            | Msg -> Model, Cmd.none
+
+module View =
+
+    let render model dispatch =
+        Html.div []
 
 module App =
 
@@ -9,18 +28,6 @@ module App =
         Remoting.createApi()
             |> Remoting.buildProxy<IAlchemyApi>
 
-    // Get a reference to our button and cast the Element to an HTMLButtonElement
-    let myButton = document.querySelector(".my-button") :?> Browser.Types.HTMLButtonElement
-    let myList = document.querySelector(".my-list") :?> Browser.Types.HTMLUListElement
-
-    // Register our listener
-    myButton.onclick <- fun _ ->
-        async {
-            let! conceptOpt = alchemyApi.Combine("Red", "Blue")
-            let item =
-                document.createElement("li")
-                    |> myList.appendChild
-            document.createTextNode($"{conceptOpt}")
-                |> item.appendChild
-                |> ignore
-        } |> Async.StartImmediate
+    Program.mkProgram Model.init Model.update View.render
+        |> Program.withReactSynchronous "elmish-app"
+        |> Program.run
