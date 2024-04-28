@@ -5,21 +5,20 @@ open System.IO
 open FSharp.Control
 
 open LLama
+open LLama.Abstractions
 open LLama.Common
+
+type Oracle =
+    {
+        Executor : ILLamaExecutor
+        InferenceParams : IInferenceParams
+        ConceptSet : Set<Concept>
+    }
 
 module Oracle =
 
-    // https://huggingface.co/QuantFactory/Meta-Llama-3-8B-Instruct-GGUF/tree/main
-    let private modelPath = @"C:\Users\brian\source\repos\ImaginaryAlchemy\Server\Meta-Llama-3-8B-Instruct.Q4_K_M.gguf"
-    let private parameters = ModelParams(modelPath, GpuLayerCount = 100)
-    let private model = LLamaWeights.LoadFromFile(parameters)
-    let private executor = StatelessExecutor(model, parameters)
-    let private antiPrompt = ">"
-    let private inferenceParams =
-        InferenceParams(
-            Temperature = 0.0f,
-            AntiPrompts = [antiPrompt],
-            MaxTokens = 10)
+    let private modelPath =
+        @"C:\Users\brian\source\repos\ImaginaryAlchemy\Server\Meta-Llama-3-8B-Instruct.Q4_K_M.gguf"
 
     [<Literal>]
     let private promptTemplate =
@@ -27,16 +26,35 @@ module Oracle =
 > Fire + Water = Steam
 > %s + %s = """
 
-    // https://www.reddit.com/r/learnprogramming/comments/4yoap9/large_word_list_of_english_nouns/
-    let private allConcepts =
-        File.ReadLines("nouns.txt")
-            |> Seq.map _.ToLower()
-            |> set
+    let private antiPrompt = ">"
+
+    let create () =
+
+        // https://huggingface.co/QuantFactory/Meta-Llama-3-8B-Instruct-GGUF/tree/main
+        let executor =
+            let modelParams = ModelParams(modelPath, GpuLayerCount = 100)
+            let model = LLamaWeights.LoadFromFile(modelParams)
+            StatelessExecutor(model, modelParams)
+        let inferenceParams =
+            InferenceParams(
+                Temperature = 0.0f,
+                AntiPrompts = [antiPrompt],
+                MaxTokens = 10)
+        // https://www.reddit.com/r/learnprogramming/comments/4yoap9/large_word_list_of_english_nouns/
+        let conceptSet =
+            File.ReadLines("nouns.txt")
+                |> Seq.map _.ToLower()
+                |> set
+        {
+            Executor = executor
+            InferenceParams = inferenceParams
+            ConceptSet = conceptSet
+        }
 
     let private normalize (name : string) =
         name[0..0].ToUpper() + name[1..].ToLower()
 
-    let combine (conceptA : string) (conceptB : string) =
+    let combine (conceptA : string) (conceptB : string) oracle =
         let conceptA = normalize conceptA
         let conceptB = normalize conceptB
         if conceptA = conceptB then
@@ -50,7 +68,9 @@ module Oracle =
                     .Replace("\r", "")
             async {
                 let! text =
-                    executor.InferAsync(prompt, inferenceParams)
+                    oracle.Executor.InferAsync(
+                        prompt,
+                        oracle.InferenceParams)
                         |> AsyncSeq.ofAsyncEnum
                         |> AsyncSeq.fold (+) ""
                 let concept =
@@ -59,7 +79,7 @@ module Oracle =
                         text.Substring(0, text.Length - antiPrompt.Length)
                     else text
                 let concept = normalize concept
-                if allConcepts.Contains(concept.ToLower())
+                if oracle.ConceptSet.Contains(concept.ToLower())
                     && concept <> conceptA
                     && concept <> conceptB then
                     return Some concept

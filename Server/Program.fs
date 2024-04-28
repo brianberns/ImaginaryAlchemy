@@ -9,10 +9,10 @@ open Fable.Remoting.Suave
 
 module Program =
 
-    let combine (conceptA, conceptB) =
+    let combine oracle (conceptA, conceptB) =
         async {
             let! conceptOpt =
-                Oracle.combine conceptA conceptB
+                Oracle.combine conceptA conceptB oracle
             return conceptOpt
                 |> Option.map (fun concept ->
                     {
@@ -21,12 +21,11 @@ module Program =
                     })
         }
 
-    let alchemyApi : IAlchemyApi =
-        {
-            Combine = combine
-        }
-
     try
+
+        let alchemyApi =
+            let oracle = Oracle.create ()
+            { Combine = combine oracle }
 
             // create the web service
         let service : WebPart =
