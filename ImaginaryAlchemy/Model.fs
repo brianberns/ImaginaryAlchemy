@@ -17,6 +17,7 @@ module Concept =
 
 module Model =
 
+    // https://huggingface.co/QuantFactory/Meta-Llama-3-8B-Instruct-GGUF/tree/main
     let private modelPath = @"C:\Users\brian\source\repos\ImaginaryAlchemy\ImaginaryAlchemy\Meta-Llama-3-8B-Instruct.Q4_K_M.gguf"
     let private parameters = ModelParams(modelPath, GpuLayerCount = 100)
     let private model = LLamaWeights.LoadFromFile(parameters)
