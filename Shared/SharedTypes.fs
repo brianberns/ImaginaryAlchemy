@@ -4,5 +4,5 @@ type Concept = string
 
 type IAlchemyApi =
     {
-        Combine : (Concept * Concept) -> Async<Option<Concept>>
+        Combine : (Concept * Concept) -> Async<Option<Concept * int>>
     }

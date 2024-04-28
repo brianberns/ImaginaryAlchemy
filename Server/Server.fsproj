@@ -10,10 +10,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Compile Include="..\Shared\SharedTypes.fs" />
+    <Compile Include="Oracle.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
-  <ItemGroup />
 
   <ItemGroup>
     <PackageReference Include="Fable.Remoting.Suave" Version="4.38.0" />
