@@ -4,7 +4,10 @@ open Feliz
 
 module View =
 
-    let renderConceptCard concept (conceptMap : Map<_, _>) dispatchOpt =
+    let renderConceptCard
+        concept
+        gen
+        dispatch =
         Html.div [
             prop.className "concept-card"
             prop.children [
@@ -15,35 +18,43 @@ module View =
                 Html.span [
                     prop.className "generation"
                     prop.innerHtml
-                        (String.replicate
-                            conceptMap[concept]
-                            "&bull;")
+                        (String.replicate gen "&bull;")
                 ]
             ]
-            match dispatchOpt with
-                | Some dispatch ->
-                    prop.onClick (fun _ ->
-                        dispatch concept)
-                | None -> ()
+            prop.onClick (fun _ ->
+                dispatch concept)
         ]
 
     let renderSelected model dispatch =
+        let concepts =
+            [ model.FirstOpt; model.SecondOpt ]
+                |> List.choose id
         Html.div [
-            renderConceptCard model.First model.ConceptMap None
-            renderConceptCard model.Second model.ConceptMap None
+            for concept in concepts do
+                renderConceptCard
+                    concept
+                    model.ConceptMap[concept]
+                    ignore
             Html.button [
                 prop.text "Combine"
                 prop.onClick (fun _ ->
                     Combine |> dispatch)
+                prop.disabled (concepts.Length <> 2)
             ]
         ]
 
     let renderConceptCards model dispatch =
         Html.div [
             prop.className "concept-cards"
-            model.ConceptMap.Keys
-                |> Seq.map (fun concept ->
-                    renderConceptCard concept model.ConceptMap dispatch)
+            model.ConceptMap
+                |> Map.toSeq
+                |> Seq.sortBy (fun (concept, gen) ->
+                    gen, concept)
+                |> Seq.map (fun (concept, gen) ->
+                    renderConceptCard
+                        concept
+                        gen
+                        dispatch)
                 |> prop.children
         ]
 
@@ -52,8 +63,5 @@ module View =
             renderSelected model dispatch
             renderConceptCards
                 model
-                (Some (SetFirst >> dispatch))
-            renderConceptCards
-                model
-                (Some (SetSecond >> dispatch))
+                (Select >> dispatch)
         ]        

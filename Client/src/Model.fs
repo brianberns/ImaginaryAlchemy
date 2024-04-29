@@ -12,13 +12,12 @@ module Alchemy =
 type Model =
     {
         ConceptMap : Map<Concept, (*generation*) int>
-        First : Concept
-        Second : Concept
+        FirstOpt : Option<Concept>
+        SecondOpt : Option<Concept>
     }
 
 type Msg =
-    | SetFirst of Concept
-    | SetSecond of Concept
+    | Select of Concept
     | Combine
     | Upsert of Concept * (*generation*) int * (*isNew*) bool
     | Fail
@@ -37,35 +36,38 @@ module Model =
                 ]
             {
                 ConceptMap = conceptMap
-                First = "Earth"
-                Second = "Water"
+                FirstOpt = None
+                SecondOpt = None
             }
         model, Cmd.none
 
-    let private setFirst concept model =
-        let model' = { model with First = concept }
-        model', Cmd.none
-
-    let private setSecond concept model =
-        let model' = { model with Second = concept }
+    let private select concept model =
+        let model' =
+            { model with
+                FirstOpt = model.SecondOpt
+                SecondOpt = Some concept }
         model', Cmd.none
 
     let private combine model =
-        let gen =
-            let genFirst = model.ConceptMap[model.First]
-            let genSecond = model.ConceptMap[model.Second]
-            (max genFirst genSecond) + 1
         let cmd =
-            Cmd.OfAsync.perform
-                (fun () ->
-                    Alchemy.api.Combine(
-                        model.First,
-                        model.Second))
-                ()
-                (function
-                    | Some (concept, isNew) ->
-                        Upsert (concept, gen, isNew)
-                    | None -> Fail)
+            option {
+                let! first = model.FirstOpt
+                let! second = model.SecondOpt
+                let genFirst = model.ConceptMap[first]
+                let genSecond = model.ConceptMap[second]
+                let gen = (max genFirst genSecond) + 1
+                return
+                    Cmd.OfAsync.perform
+                        (fun () ->
+                            Alchemy.api.Combine(
+                                first,
+                                second))
+                        ()
+                        (function
+                            | Some (concept, isNew) ->
+                                Upsert (concept, gen, isNew)
+                            | None -> Fail)
+            } |> Option.defaultValue Cmd.none
         model, cmd
 
     let private upsert concept gen isNew model =
@@ -74,8 +76,8 @@ module Model =
                 ConceptMap =
                     Map.add concept gen
                         model.ConceptMap
-                First = concept
-                Second = concept }
+                FirstOpt = Some concept
+                SecondOpt = None }
         model', Cmd.none
 
     let private fail model =
@@ -83,10 +85,8 @@ module Model =
 
     let update msg model =
         match msg with
-            | SetFirst concept ->
-                setFirst concept model
-            | SetSecond concept ->
-                setFirst concept model
+            | Select concept ->
+                select concept model
             | Combine ->
                 combine model
             | Upsert (concept, gen, isNew) ->
