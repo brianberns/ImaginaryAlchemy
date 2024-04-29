@@ -4,7 +4,7 @@ open Feliz
 
 module View =
 
-    let renderConceptCard
+    let private renderConceptCard
         concept
         gen
         dispatch =
@@ -25,25 +25,39 @@ module View =
                 dispatch concept)
         ]
 
-    let renderSelected model dispatch =
-        let concepts =
-            [ model.FirstOpt; model.SecondOpt ]
-                |> List.choose id
-        Html.div [
-            for concept in concepts do
+    let private renderInput
+        conceptOpt
+        (conceptMap : Map<_, _>) =
+        match conceptOpt with
+            | Some concept ->
                 renderConceptCard
                     concept
-                    model.ConceptMap[concept]
+                    conceptMap[concept]
                     ignore
+            | None ->
+                Html.div [
+                    prop.className "empty-input"
+                ]
+
+    let private renderSelected model dispatch =
+        Html.div [
+            renderInput
+                model.FirstOpt
+                model.ConceptMap
             Html.button [
                 prop.text "Combine"
                 prop.onClick (fun _ ->
                     Combine |> dispatch)
-                prop.disabled (concepts.Length <> 2)
+                prop.disabled
+                    (model.FirstOpt.IsNone
+                        || model.SecondOpt.IsNone)
             ]
+            renderInput
+                model.SecondOpt
+                model.ConceptMap
         ]
 
-    let renderConceptCards model dispatch =
+    let private renderConceptCards model dispatch =
         Html.div [
             prop.className "concept-cards"
             model.ConceptMap
