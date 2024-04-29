@@ -1,5 +1,6 @@
 ﻿namespace ImaginaryAlchemy
 
+open System
 open System.IO
 
 open FSharp.Control
@@ -58,6 +59,14 @@ module Oracle =
         concept = normalize concept
             && oracle.ConceptSet.Contains(concept)
 
+    let private useColor color =
+        Console.ForegroundColor <- color
+        {
+            new IDisposable with
+                member _.Dispose() =
+                    Console.ForegroundColor <- ConsoleColor.White
+        }
+
     let combine oracle (first : Concept) (second : Concept) =
         if isValid oracle first
             && isValid oracle second
@@ -84,8 +93,12 @@ module Oracle =
             if oracle.ConceptSet.Contains(concept)
                 && concept <> first
                 && concept <> second then
+                use _ = useColor ConsoleColor.Green
+                printfn $"Accepted: {first} + {second} = {concept}"
                 Some concept
             else
+                use _ = useColor ConsoleColor.Red
+                printfn $"Rejected: {first} + {second} = {concept}"
                 None
         else
             None

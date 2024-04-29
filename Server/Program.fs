@@ -9,31 +9,6 @@ open Suave.Operators
 open Fable.Remoting.Server
 open Fable.Remoting.Suave
 
-module Prelude =
-
-    let memoize f =
-        let cache = Dictionary<_, _>()
-        fun key ->
-            match cache.TryGetValue(key) with
-                | true, value -> value
-                | _ -> 
-                    let value = f key
-                    cache.Add(key, value)
-                    value
-
-/// Option computation expression builder.
-type OptionBuilder() =
-    member _.Bind(opt, f) = Option.bind f opt
-    member _.Return(x) = Some x
-    member _.ReturnFrom(opt : Option<_>) = opt
-    member _.Zero() = None
-
-[<AutoOpen>]
-module OptionBuilder =
-
-    /// Option computation expression builder.
-    let option = OptionBuilder()
-
 module Program =
 
     let private genDict =
@@ -59,13 +34,15 @@ module Program =
                 let! genFirst = Dictionary.tryFind first genDict
                 let! genSecond = Dictionary.tryFind second genDict
                 let! concept = combine first second
-                let gen = (max genFirst genSecond) + 1
-                genDict[concept] <- gen
-                return 
-                    {
-                        Concept = concept
-                        Generation = gen
-                    }
+                let newGen = (max genFirst genSecond) + 1
+                let isNew =
+                    match Dictionary.tryFind concept genDict with
+                        | Some oldGen when oldGen >= newGen ->
+                            false
+                        | _ ->
+                            genDict[concept] <- newGen
+                            true
+                return concept, isNew
             })
 
     try

@@ -9,6 +9,7 @@
     <Content Include="nouns.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Compile Include="Prelude.fs" />
     <Compile Include="..\Shared\SharedTypes.fs" />
     <Compile Include="Oracle.fs" />
     <Compile Include="Program.fs" />
