@@ -5,70 +5,135 @@ open Elmish
 open Elmish.React
 open Feliz
 
+module Alchemy =
+
+    let api =
+        Remoting.createApi()
+            |> Remoting.buildProxy<IAlchemyApi>
+
 type Model =
     {
-        ConceptInfos : List<ConceptInfo>
-        First : ConceptInfo
-        Second : ConceptInfo
+        ConceptMap : Map<Concept, int>
+        First : Concept
+        Second : Concept
     }
 
-type Msg = Msg
+type Msg =
+    | SetFirst of Concept
+    | SetSecond of Concept
+    | Combine
+    | Upsert of ConceptInfo
+    | Fail
 
 module Model =
 
     let init () =
         let model =
-            let conceptInfos =
-                [
+            let conceptMap =
+                Map [
                     "Earth", 0
                     "Fire", 0
                     "Water", 0
                     "Air", 0
                     "Steam", 1
-                ] |> List.map (fun (concept, gen) ->
-                    {
-                        Concept = concept
-                        Generation = gen
-                    })
+                ]
             {
-                ConceptInfos = conceptInfos
-                First = conceptInfos.Head
-                Second = conceptInfos.Head
+                ConceptMap = conceptMap
+                First = "Earth"
+                Second = "Water"
             }
         model, Cmd.none
 
     let update msg model =
         match msg with
-            | Msg -> model, Cmd.none
+            | SetFirst concept ->
+                let model' = { model with First = concept }
+                model', Cmd.none
+            | SetSecond concept ->
+                let model' = { model with Second = concept }
+                model', Cmd.none
+            | Combine ->
+                let cmd =
+                    Cmd.OfAsync.perform
+                        (fun () ->
+                            Alchemy.api.Combine(
+                                model.First,
+                                model.Second))
+                        ()
+                        (function
+                            | Some info ->
+                                Upsert info
+                            | None -> Fail)
+                model, cmd
+            | Upsert info ->
+                let model' =
+                    { model with
+                        ConceptMap =
+                            Map.add
+                                info.Concept
+                                info.Generation
+                                model.ConceptMap }
+                model', Cmd.none
+            | Fail ->
+                model, Cmd.none
 
 module View =
 
-    let renderConceptInfo info =
+    let renderConceptCard concept (conceptMap : Map<_, _>) dispatchOpt =
         Html.div [
-            prop.className "concept-info"
+            prop.className "concept-card"
             prop.children [
                 Html.span [
                     prop.className "concept"
-                    prop.text info.Concept
+                    prop.text (concept : Concept)
                 ]
                 Html.span [
                     prop.className "generation"
                     prop.innerHtml
-                        (String.replicate info.Generation "&bull;")
+                        (String.replicate
+                            conceptMap[concept]
+                            "&bull;")
                 ]
+            ]
+            match dispatchOpt with
+                | Some dispatch ->
+                    prop.onClick (fun _ ->
+                        dispatch concept)
+                | None -> ()
+        ]
+
+    let renderSelected model dispatch =
+        Html.div [
+            renderConceptCard model.First model.ConceptMap None
+            renderConceptCard model.Second model.ConceptMap None
+            Html.button [
+                prop.text "Combine"
+                prop.onClick (fun _ ->
+                    Combine |> dispatch)
             ]
         ]
 
+    let renderConceptCards model dispatch =
+        Html.div [
+            prop.className "concept-cards"
+            model.ConceptMap.Keys
+                |> Seq.map (fun concept ->
+                    renderConceptCard concept model.ConceptMap dispatch)
+                |> prop.children
+        ]
+
     let render model dispatch =
-        model.ConceptInfos
-            |> Seq.map renderConceptInfo
-            |> Html.div
+        Html.div [
+            renderSelected model dispatch
+            renderConceptCards
+                model
+                (Some (SetFirst >> dispatch))
+            renderConceptCards
+                model
+                (Some (SetSecond >> dispatch))
+        ]        
 
 module App =
-
-    let alchemyApi =
-        Remoting.createApi()
-            |> Remoting.buildProxy<IAlchemyApi>
 
     Program.mkProgram Model.init Model.update View.render
         |> Program.withReactSynchronous "elmish-app"
