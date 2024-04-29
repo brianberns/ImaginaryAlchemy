@@ -43,9 +43,17 @@ module Model =
 
     let private select concept model =
         let model' =
+            let firstOpt, secondOpt =
+                if model.FirstOpt.IsNone then
+                    assert(model.SecondOpt.IsNone)
+                    Some concept, None
+                elif model.SecondOpt.IsNone then
+                    model.FirstOpt, Some concept
+                else
+                    model.SecondOpt, Some concept
             { model with
-                FirstOpt = model.SecondOpt
-                SecondOpt = Some concept }
+                FirstOpt = firstOpt
+                SecondOpt = secondOpt }
         model', Cmd.none
 
     let private combine model =
