@@ -4,6 +4,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\Shared\SharedTypes.fs" />
+    <Compile Include="Model.fs" />
+    <Compile Include="View.fs" />
     <Compile Include="App.fs" />
   </ItemGroup>
   <ItemGroup>
