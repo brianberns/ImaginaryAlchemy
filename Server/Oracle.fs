@@ -67,29 +67,46 @@ module Oracle =
                     Console.ForegroundColor <- ConsoleColor.White
         }
 
+    /// Infers the combination of two concepts.
+    let private infer oracle (first : Concept) (second : Concept) =
+        let prompt =
+            (sprintf promptTemplate first second)
+                .Replace("\r", "")
+        let str =
+            oracle.Executor.InferAsync(
+                prompt,
+                oracle.InferenceParams)
+                |> AsyncSeq.ofAsyncEnum
+                |> AsyncSeq.fold (+) ""
+                |> Async.RunSynchronously   // make inference synchronous
+        let str =
+            let str = str.TrimEnd()
+            if str.EndsWith(antiPrompt) then
+                str.Substring(0, str.Length - antiPrompt.Length)
+            else str
+        normalize (str.Trim())
+
+    /// Combines the given concepts.
     let combine oracle (first : Concept) (second : Concept) =
+
+            // check for valid input
         if isValid oracle first
             && isValid oracle second
             && first <> second then
+
+                // normalize concept order
             let first, second =
                 min first second,
                 max first second
-            let prompt =
-                (sprintf promptTemplate first second)
-                    .Replace("\r", "")
-            let str =
-                oracle.Executor.InferAsync(
-                    prompt,
-                    oracle.InferenceParams)
-                    |> AsyncSeq.ofAsyncEnum
-                    |> AsyncSeq.fold (+) ""
-                    |> Async.RunSynchronously   // make inference synchronous
-            let str =
-                let str = str.TrimEnd()
-                if str.EndsWith(antiPrompt) then
-                    str.Substring(0, str.Length - antiPrompt.Length)
-                else str
-            let concept = normalize (str.Trim())
+
+                // combine concepts
+            let concept =
+                if first = "Fire" && second = "Water" then   // hard-coded example
+                    "Steam"
+                else
+                    infer oracle first second
+
+                // accept result?
             if oracle.ConceptSet.Contains(concept)
                 && concept <> first
                 && concept <> second then
