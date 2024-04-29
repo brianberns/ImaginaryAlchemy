@@ -1,6 +1,5 @@
 ﻿namespace ImaginaryAlchemy
 
-open System
 open System.IO
 
 open FSharp.Control
@@ -29,7 +28,7 @@ module Oracle =
 
     let private antiPrompt = ">"
 
-    let private normalize (concept : Concept) =
+    let private normalize (concept : Concept) : Concept =
         concept[0..0].ToUpper() + concept[1..].ToLower()
 
     let create () =
@@ -59,35 +58,34 @@ module Oracle =
         concept = normalize concept
             && oracle.ConceptSet.Contains(concept)
 
-    let combine oracle first second =
-        async {
-            if isValid oracle first
-                && isValid oracle second
-                && first <> second then
-                let first, second =
-                    min first second,
-                    max first second
-                let prompt =
-                    (sprintf promptTemplate first second)
-                        .Replace("\r", "")
-                let! str =
-                    oracle.Executor.InferAsync(
-                        prompt,
-                        oracle.InferenceParams)
-                        |> AsyncSeq.ofAsyncEnum
-                        |> AsyncSeq.fold (+) ""
-                let str =
-                    let str = str.Trim()
-                    if str.EndsWith(antiPrompt) then
-                        str.Substring(0, str.Length - antiPrompt.Length)
-                    else str
-                let concept = normalize str
-                if oracle.ConceptSet.Contains(concept)
-                    && concept <> first
-                    && concept <> second then
-                    return Some concept
-                else
-                    return None
+    let combine oracle (first : Concept) (second : Concept) =
+        if isValid oracle first
+            && isValid oracle second
+            && first <> second then
+            let first, second =
+                min first second,
+                max first second
+            let prompt =
+                (sprintf promptTemplate first second)
+                    .Replace("\r", "")
+            let str =
+                oracle.Executor.InferAsync(
+                    prompt,
+                    oracle.InferenceParams)
+                    |> AsyncSeq.ofAsyncEnum
+                    |> AsyncSeq.fold (+) ""
+                    |> Async.RunSynchronously   // make inference synchronous
+            let str =
+                let str = str.TrimEnd()
+                if str.EndsWith(antiPrompt) then
+                    str.Substring(0, str.Length - antiPrompt.Length)
+                else str
+            let concept = normalize (str.Trim())
+            if oracle.ConceptSet.Contains(concept)
+                && concept <> first
+                && concept <> second then
+                Some concept
             else
-                return None
-        }
+                None
+        else
+            None

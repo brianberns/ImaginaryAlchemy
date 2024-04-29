@@ -1,11 +1,25 @@
 ﻿namespace ImaginaryAlchemy
 
+open System.Collections.Generic
+
 open Suave
 open Suave.Logging
 open Suave.Operators
 
 open Fable.Remoting.Server
 open Fable.Remoting.Suave
+
+module Prelude =
+
+    let memoize f =
+        let cache = Dictionary<_, _>()
+        fun key ->
+            match cache.TryGetValue(key) with
+                | true, value -> value
+                | _ -> 
+                    let value = f key
+                    cache.Add(key, value)
+                    value
 
 /// Option computation expression builder.
 type OptionBuilder() =
@@ -20,40 +34,51 @@ module OptionBuilder =
     /// Option computation expression builder.
     let option = OptionBuilder()
 
-type StateValue =
-    {
-        First : Concept
-        Second : Concept
-        Generation : int
-    }
-
-type State = Map<Concept, StateValue>
-
-module State =
-
-    let empty : State = Map.empty
-
 module Program =
 
-    let mutable state = State.empty
+    let private genDict =
+        [
+            "Earth", 0
+            "Air", 0
+            "Fire", 0
+            "Water", 0
+            "Steam", 1
+        ]
+            |> Seq.map KeyValuePair
+            |> Dictionary<_, _>
 
-    let combine oracle (first, second) =
-        async {
-            let! conceptOpt =
-                Oracle.combine oracle first second
-            return conceptOpt
-                |> Option.map (fun concept ->
+    let private memoize oracle =
+        Oracle.combine oracle
+            |> uncurry
+            |> Prelude.memoize
+            |> curry
+
+    let private apply combine first second =
+        lock genDict (fun () ->
+            option {
+                let! genFirst = Dictionary.tryFind first genDict
+                let! genSecond = Dictionary.tryFind second genDict
+                let! concept = combine first second
+                let gen = genFirst + genSecond
+                genDict[concept] <- gen
+                return 
                     {
                         Concept = concept
-                        Generation = 0
-                    })
-        }
+                        Generation = gen
+                    }
+            })
 
     try
 
         let alchemyApi =
-            let oracle = Oracle.create ()
-            { Combine = combine oracle }
+            {
+                Combine =
+                    let combine = memoize (Oracle.create ())
+                    fun (first, second) ->
+                        async {
+                            return apply combine first second
+                        }
+            }
 
             // create the web service
         let service : WebPart =
@@ -69,7 +94,7 @@ module Program =
             // start the web server
         let config =
             { defaultConfig with
-                bindings = [ HttpBinding.createSimple HTTP "localhost" 5000 ] }
+                bindings = [ HttpBinding.createSimple HTTP "127.0.0.1" 5000 ] }
         startWebServer config service
 
     with exn -> printfn $"{exn.Message}"
