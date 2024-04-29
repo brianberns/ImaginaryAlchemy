@@ -1,0 +1,14 @@
+.concept-info {
+    display: inline-block;
+    border: solid 1px black;
+    padding: 2px;
+    margin: 2px;
+}
+
+.concept {
+    margin-right: 2px;
+}
+
+.generation {
+    margin-left: 2px;
+}
