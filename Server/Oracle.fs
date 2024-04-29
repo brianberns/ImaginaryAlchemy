@@ -86,6 +86,25 @@ module Oracle =
             else str
         normalize (str.Trim())
 
+    let private trySingular oracle (concept : Concept) =
+
+        let test suffix =
+            if concept.EndsWith(suffix : string) then
+                let concept' =
+                    concept.Substring(
+                        0,
+                        concept.Length - suffix.Length)
+                if oracle.ConceptSet.Contains(concept') then
+                    Some concept'
+                else None
+            else None
+
+        test ""
+            |> Option.orElseWith (fun () ->
+                test "es")
+            |> Option.orElseWith (fun () ->
+                test "s")
+
     /// Combines the given concepts.
     let combine oracle (first : Concept) (second : Concept) =
 
@@ -107,15 +126,16 @@ module Oracle =
                     infer oracle first second
 
                 // accept result?
-            if oracle.ConceptSet.Contains(concept)
-                && concept <> first
-                && concept <> second then
-                use _ = useColor ConsoleColor.Green
-                printfn $"Accepted: {first} + {second} = {concept}"
-                Some concept
-            else
-                use _ = useColor ConsoleColor.Red
-                printfn $"Rejected: {first} + {second} = {concept}"
-                None
+            match trySingular oracle concept with
+                | Some concept when
+                    concept <> first
+                        && concept <> second ->
+                        use _ = useColor ConsoleColor.Green
+                        printfn $"Accepted: {first} + {second} = {concept}"
+                        Some concept
+                | _ ->
+                    use _ = useColor ConsoleColor.Red
+                    printfn $"Rejected: {first} + {second} = {concept}"
+                    None
         else
             None
