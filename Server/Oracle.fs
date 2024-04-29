@@ -41,7 +41,7 @@ module Oracle =
             StatelessExecutor(model, modelParams)
         let inferenceParams =
             InferenceParams(
-                Temperature = 0.0f,
+                Temperature = 0.1f,
                 AntiPrompts = [antiPrompt],
                 MaxTokens = 10)
         // https://www.reddit.com/r/learnprogramming/comments/4yoap9/large_word_list_of_english_nouns/
