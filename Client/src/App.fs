@@ -72,7 +72,9 @@ module Model =
                             Map.add
                                 info.Concept
                                 info.Generation
-                                model.ConceptMap }
+                                model.ConceptMap
+                        First = info.Concept
+                        Second = info.Concept }
                 model', Cmd.none
             | Fail ->
                 model, Cmd.none

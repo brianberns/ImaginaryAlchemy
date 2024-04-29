@@ -59,7 +59,7 @@ module Program =
                 let! genFirst = Dictionary.tryFind first genDict
                 let! genSecond = Dictionary.tryFind second genDict
                 let! concept = combine first second
-                let gen = genFirst + genSecond
+                let gen = (max genFirst genSecond) + 1
                 genDict[concept] <- gen
                 return 
                     {
