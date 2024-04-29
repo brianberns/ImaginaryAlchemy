@@ -61,9 +61,10 @@ module Model =
             option {
                 let! first = model.FirstOpt
                 let! second = model.SecondOpt
-                let genFirst = model.ConceptMap[first]
-                let genSecond = model.ConceptMap[second]
-                let gen = (max genFirst genSecond) + 1
+                let gen =
+                    let genFirst = model.ConceptMap[first]
+                    let genSecond = model.ConceptMap[second]
+                    (max genFirst genSecond) + 1
                 return
                     Cmd.OfAsync.perform
                         (fun () ->
@@ -73,7 +74,12 @@ module Model =
                         ()
                         (function
                             | Some (concept, isNew) ->
-                                Upsert (concept, gen, isNew)
+                                let gen' =
+                                    model.ConceptMap
+                                        |> Map.tryFind concept
+                                        |> Option.map (min gen)
+                                        |> Option.defaultValue gen
+                                Upsert (concept, gen', isNew)
                             | None -> Fail)
             } |> Option.defaultValue Cmd.none
         model, cmd
