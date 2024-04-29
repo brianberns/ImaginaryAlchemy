@@ -103,7 +103,7 @@ module Program =
         let newConceptMap =
             Map [
                 "Earth", None
-                "Wind", None
+                "Air", None
                 "Steam", Some ("Fire", "Water")
             ]
         Inventory.create oldConceptMap newConceptMap
