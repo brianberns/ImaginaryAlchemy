@@ -27,7 +27,8 @@ module View =
 
     let private renderConceptOpt
         conceptOpt
-        (conceptMap : Map<_, _>) =
+        (conceptMap : Map<_, _>)
+        className =
         match conceptOpt with
             | Some concept ->
                 renderConceptCard
@@ -36,7 +37,7 @@ module View =
                     ignore
             | None ->
                 Html.div [
-                    prop.className "empty-concept"
+                    prop.className (className : string)
                     prop.innerHtml "&nbsp;"
                 ]
 
@@ -44,15 +45,24 @@ module View =
         Html.div [
             prop.id "workspace"
             prop.children [
-                renderConceptOpt
-                    model.CombinedOpt
-                    model.ConceptMap
+
                 Html.div [
-                    prop.id "workspace-bottom"
+                    prop.id "workspace-row"
+                    prop.children [
+                        renderConceptOpt
+                            model.CombinedOpt
+                            model.ConceptMap
+                            "empty-concept-invisible"
+                    ]
+                ]
+
+                Html.div [
+                    prop.id "workspace-row"
                     prop.children [
                         renderConceptOpt
                             model.FirstOpt
                             model.ConceptMap
+                            "empty-concept"
                         Html.button [
                             prop.text "Combine"
                             prop.onClick (fun _ ->
@@ -64,6 +74,7 @@ module View =
                         renderConceptOpt
                             model.SecondOpt
                             model.ConceptMap
+                            "empty-concept"
                     ]
                 ]
             ]
@@ -86,8 +97,12 @@ module View =
 
     let render model dispatch =
         Html.div [
-            renderWorkspace model dispatch
-            renderConceptCards
-                model
-                (Select >> dispatch)
+            if model.IsLoading then
+                prop.className "loading"
+            prop.children [
+                renderWorkspace model dispatch
+                renderConceptCards
+                    model
+                    (Select >> dispatch)
+            ]
         ]        

@@ -3,6 +3,10 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+.loading {
+    cursor: wait;
+}
+
 #workspace {
     display: flex;
     flex-wrap: nowrap;
@@ -10,7 +14,7 @@ body {
     justify-content: center;
 }
 
-#workspace-bottom {
+#workspace-row {
     display: flex;
     flex-wrap: nowrap;
     flex-direction: row;
@@ -23,7 +27,7 @@ body {
     padding-left: 5px;
     padding-right: 5px;
     margin: 5px;
-    cursor: default;
+    cursor: inherit;
 }
 
 .concept {
@@ -38,5 +42,15 @@ body {
     display: inline-block;
     border: dashed 2px black;
     margin: 5px;
+    cursor: inherit;
+    height: 50px;
+    width: 150px;
+}
+
+.empty-concept-invisible {
+    display: inline-block;
+    margin: 5px;
     cursor: default;
+    height: 50px;
+    width: 150px;
 }

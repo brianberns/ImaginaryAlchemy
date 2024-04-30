@@ -15,6 +15,7 @@ type Model =
         FirstOpt : Option<Concept>
         SecondOpt : Option<Concept>
         CombinedOpt : Option<Concept>
+        IsLoading : bool
     }
 
 type Msg =
@@ -40,6 +41,7 @@ module Model =
                 FirstOpt = None
                 SecondOpt = None
                 CombinedOpt = None
+                IsLoading = false
             }
         model, Cmd.none
 
@@ -55,10 +57,13 @@ module Model =
                     model.SecondOpt, Some concept
             { model with
                 FirstOpt = firstOpt
-                SecondOpt = secondOpt }
+                SecondOpt = secondOpt
+                CombinedOpt = None }
         model', Cmd.none
 
     let private combine model =
+        let model' =
+            { model with IsLoading = true }
         let cmd =
             option {
                 let! first = model.FirstOpt
@@ -84,7 +89,7 @@ module Model =
                                 Upsert (concept, gen', isNew)
                             | None -> Fail)
             } |> Option.defaultValue Cmd.none
-        model, cmd
+        model', cmd
 
     let private upsert concept gen isNew model =
         let model' =
@@ -94,11 +99,14 @@ module Model =
                         model.ConceptMap
                 FirstOpt = None
                 SecondOpt = None
-                CombinedOpt = Some concept }
+                CombinedOpt = Some concept
+                IsLoading = false }
         model', Cmd.none
 
     let private fail model =
-        model, Cmd.none
+        let model' =
+            { model with IsLoading = false }
+        model', Cmd.none
 
     let update msg model =
         match msg with
