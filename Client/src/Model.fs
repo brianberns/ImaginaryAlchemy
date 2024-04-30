@@ -14,6 +14,7 @@ type Model =
         ConceptMap : Map<Concept, (*generation*) int>
         FirstOpt : Option<Concept>
         SecondOpt : Option<Concept>
+        CombinedOpt : Option<Concept>
     }
 
 type Msg =
@@ -38,6 +39,7 @@ module Model =
                 ConceptMap = conceptMap
                 FirstOpt = None
                 SecondOpt = None
+                CombinedOpt = None
             }
         model, Cmd.none
 
@@ -90,8 +92,9 @@ module Model =
                 ConceptMap =
                     Map.add concept gen
                         model.ConceptMap
-                FirstOpt = Some concept
-                SecondOpt = None }
+                FirstOpt = None
+                SecondOpt = None
+                CombinedOpt = Some concept }
         model', Cmd.none
 
     let private fail model =

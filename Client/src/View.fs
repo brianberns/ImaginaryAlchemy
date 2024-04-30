@@ -25,7 +25,7 @@ module View =
                 dispatch concept)
         ]
 
-    let private renderInput
+    let private renderConceptOpt
         conceptOpt
         (conceptMap : Map<_, _>) =
         match conceptOpt with
@@ -36,25 +36,37 @@ module View =
                     ignore
             | None ->
                 Html.div [
-                    prop.className "empty-input"
+                    prop.className "empty-concept"
+                    prop.innerHtml "&nbsp;"
                 ]
 
-    let private renderSelected model dispatch =
+    let private renderWorkspace model dispatch =
         Html.div [
-            renderInput
-                model.FirstOpt
-                model.ConceptMap
-            Html.button [
-                prop.text "Combine"
-                prop.onClick (fun _ ->
-                    Combine |> dispatch)
-                prop.disabled
-                    (model.FirstOpt.IsNone
-                        || model.SecondOpt.IsNone)
+            prop.id "workspace"
+            prop.children [
+                renderConceptOpt
+                    model.CombinedOpt
+                    model.ConceptMap
+                Html.div [
+                    prop.id "workspace-bottom"
+                    prop.children [
+                        renderConceptOpt
+                            model.FirstOpt
+                            model.ConceptMap
+                        Html.button [
+                            prop.text "Combine"
+                            prop.onClick (fun _ ->
+                                Combine |> dispatch)
+                            prop.disabled
+                                (model.FirstOpt.IsNone
+                                    || model.SecondOpt.IsNone)
+                        ]
+                        renderConceptOpt
+                            model.SecondOpt
+                            model.ConceptMap
+                    ]
+                ]
             ]
-            renderInput
-                model.SecondOpt
-                model.ConceptMap
         ]
 
     let private renderConceptCards model dispatch =
@@ -74,7 +86,7 @@ module View =
 
     let render model dispatch =
         Html.div [
-            renderSelected model dispatch
+            renderWorkspace model dispatch
             renderConceptCards
                 model
                 (Select >> dispatch)

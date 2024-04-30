@@ -3,6 +3,20 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+#workspace {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#workspace-bottom {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    justify-content: center;
+}
+
 .concept-card {
     display: inline-block;
     border: solid 1px black;
@@ -18,4 +32,11 @@ body {
 
 .generation {
     margin-left: 5px;
+}
+
+.empty-concept {
+    display: inline-block;
+    border: dashed 2px black;
+    margin: 5px;
+    cursor: default;
 }
