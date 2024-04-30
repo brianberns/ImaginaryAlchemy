@@ -97,8 +97,6 @@ module Model =
                 ConceptMap =
                     Map.add concept gen
                         model.ConceptMap
-                FirstOpt = None
-                SecondOpt = None
                 CombinedOpt = Some concept
                 IsLoading = false }
         model', Cmd.none

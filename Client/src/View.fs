@@ -28,7 +28,7 @@ module View =
     let private renderConceptOpt
         conceptOpt
         (conceptMap : Map<_, _>)
-        className =
+        visible =
         match conceptOpt with
             | Some concept ->
                 renderConceptCard
@@ -37,7 +37,10 @@ module View =
                     ignore
             | None ->
                 Html.div [
-                    prop.className (className : string)
+                    prop.classes [
+                        "empty-concept"
+                        if not visible then "invisible"
+                    ]
                     prop.innerHtml "&nbsp;"
                 ]
 
@@ -47,34 +50,43 @@ module View =
             prop.children [
 
                 Html.div [
-                    prop.id "workspace-row"
+                    prop.id "combined-concept"
                     prop.children [
                         renderConceptOpt
                             model.CombinedOpt
                             model.ConceptMap
-                            "empty-concept-invisible"
+                            false
                     ]
                 ]
 
                 Html.div [
-                    prop.id "workspace-row"
+                    prop.id "left-concept"
                     prop.children [
                         renderConceptOpt
                             model.FirstOpt
                             model.ConceptMap
-                            "empty-concept"
-                        Html.button [
-                            prop.text "Combine"
-                            prop.onClick (fun _ ->
-                                Combine |> dispatch)
-                            prop.disabled
-                                (model.FirstOpt.IsNone
-                                    || model.SecondOpt.IsNone)
-                        ]
+                            true
+                    ]
+                ]
+
+                Html.button [
+                    prop.id "combine"
+                    prop.text "Combine"
+                    prop.onClick (fun _ ->
+                        Combine |> dispatch)
+                    prop.disabled
+                        (model.IsLoading
+                            || model.FirstOpt.IsNone
+                            || model.SecondOpt.IsNone)
+                ]
+
+                Html.div [
+                    prop.id "right-concept"
+                    prop.children [
                         renderConceptOpt
                             model.SecondOpt
                             model.ConceptMap
-                            "empty-concept"
+                            true
                     ]
                 ]
             ]

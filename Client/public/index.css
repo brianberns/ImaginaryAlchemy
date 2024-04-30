@@ -8,17 +8,39 @@ body {
 }
 
 #workspace {
-    display: flex;
-    flex-wrap: nowrap;
-    flex-direction: column;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: 40% 20% 40%;
 }
 
-#workspace-row {
-    display: flex;
-    flex-wrap: nowrap;
-    flex-direction: row;
-    justify-content: center;
+#combined-concept {
+    grid-row: 1;
+    grid-column: 1 / span 3;
+    justify-self: center;
+    align-self: center;
+}
+
+#left-concept {
+    grid-row: 2;
+    grid-column: 1;
+    justify-self: end;
+    align-self: center;
+}
+
+#combine {
+    grid-row: 2;
+    grid-column: 2;
+    height: 40px;
+    width: 100px;
+    justify-self: center;
+    align-self: center;
+    cursor: inherit;
+}
+
+#right-concept {
+    grid-row: 2;
+    grid-column: 3;
+    justify-self: start;
+    align-self: center;
 }
 
 .concept-card {
@@ -40,17 +62,12 @@ body {
 
 .empty-concept {
     display: inline-block;
-    border: dashed 2px black;
+    border: dashed 1px black;
     margin: 5px;
     cursor: inherit;
-    height: 50px;
     width: 150px;
 }
 
-.empty-concept-invisible {
-    display: inline-block;
-    margin: 5px;
-    cursor: default;
-    height: 50px;
-    width: 150px;
+.invisible {
+    visibility: hidden;
 }
