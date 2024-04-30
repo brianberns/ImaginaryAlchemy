@@ -29,8 +29,8 @@ body {
 #combine {
     grid-row: 2;
     grid-column: 2;
-    height: 40px;
-    width: 100px;
+    height: 80%;
+    width: 80%;
     justify-self: center;
     align-self: center;
     cursor: inherit;
