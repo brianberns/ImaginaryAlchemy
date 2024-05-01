@@ -6,8 +6,7 @@ module View =
 
     let private renderConceptCard
         concept
-        gen
-        dispatch =
+        gen =
         Html.div [
             prop.className "concept-card"
             prop.children [
@@ -21,28 +20,69 @@ module View =
                         (String.replicate gen "&bull;")
                 ]
             ]
-            prop.onClick (fun _ ->
-                dispatch concept)
+            prop.draggable true
+            prop.onDragStart (fun evt ->
+                // Audio.enable ()
+                DragData.setConcept concept evt)
         ]
 
-    let private renderConceptOpt
+    /// Renders drag/drop properties.
+    let private renderDragDrop allow dispatch =
+        [
+                // start highlighting the target?
+            prop.onDragEnter (fun evt ->
+                if allow evt |> Option.isSome then
+                    evt.preventDefault()
+                    (*dispatch "highlight"*))
+
+                // stop highlighting the target?
+            prop.onDragLeave (fun evt ->
+                if allow evt |> Option.isSome then
+                    evt.preventDefault()
+                    (*dispatch "no-highlight"*))
+
+                // allow drop?
+            prop.onDragOver (fun evt ->
+                if allow evt |> Option.isSome then
+                    evt.preventDefault())
+
+                // drop has occurred
+            prop.onDrop (fun evt ->
+                evt.preventDefault()
+                match allow evt with
+                    | Some msg -> dispatch msg
+                    | None -> ())
+        ]
+
+    let private renderConceptSpot
         conceptOpt
         (conceptMap : Map<_, _>)
-        visible =
-        match conceptOpt with
-            | Some concept ->
-                renderConceptCard
-                    concept
-                    conceptMap[concept]
-                    ignore
-            | None ->
-                Html.div [
-                    prop.classes [
+        makeMsgOpt
+        dispatch =
+        Html.div [
+            match conceptOpt with
+                | Some concept ->
+                    prop.children [
+                        renderConceptCard
+                            concept
+                            conceptMap[concept]
+                    ]
+                | None ->
+                    prop.className [
                         "empty-concept"
-                        if not visible then "invisible"
+                        if Option.isNone makeMsgOpt then
+                            "invisible"
                     ]
                     prop.innerHtml "&nbsp;"
-                ]
+            match makeMsgOpt with
+                | Some makeMsg ->
+                    yield! renderDragDrop
+                        (fun evt ->
+                            let concept = DragData.getConcept evt
+                            Some (makeMsg concept))
+                        dispatch
+                | None -> ()
+        ]
 
     let private renderWorkspace model dispatch =
         Html.div [
@@ -52,20 +92,22 @@ module View =
                 Html.div [
                     prop.id "combined-concept"
                     prop.children [
-                        renderConceptOpt
+                        renderConceptSpot
                             model.CombinedOpt
                             model.ConceptMap
-                            false
+                            None
+                            dispatch
                     ]
                 ]
 
                 Html.div [
                     prop.id "left-concept"
                     prop.children [
-                        renderConceptOpt
+                        renderConceptSpot
                             model.FirstOpt
                             model.ConceptMap
-                            true
+                            (Some SetFirst)
+                            dispatch
                     ]
                 ]
 
@@ -83,16 +125,17 @@ module View =
                 Html.div [
                     prop.id "right-concept"
                     prop.children [
-                        renderConceptOpt
+                        renderConceptSpot
                             model.SecondOpt
                             model.ConceptMap
-                            true
+                            (Some SetSecond)
+                            dispatch
                     ]
                 ]
             ]
         ]
 
-    let private renderConceptCards model dispatch =
+    let private renderConceptCards model =
         Html.div [
             prop.className "concept-cards"
             model.ConceptMap
@@ -102,8 +145,7 @@ module View =
                 |> Seq.map (fun (concept, gen) ->
                     renderConceptCard
                         concept
-                        gen
-                        dispatch)
+                        gen)
                 |> prop.children
         ]
 
@@ -113,8 +155,6 @@ module View =
                 prop.className "loading"
             prop.children [
                 renderWorkspace model dispatch
-                renderConceptCards
-                    model
-                    (Select >> dispatch)
+                renderConceptCards model
             ]
         ]        

@@ -18,8 +18,9 @@ type Model =
         IsLoading : bool
     }
 
-type Msg =
-    | Select of Concept
+type Message =
+    | SetFirst of Concept
+    | SetSecond of Concept
     | Combine
     | Upsert of Concept * (*generation*) int * (*isNew*) bool
     | Fail
@@ -45,21 +46,13 @@ module Model =
             }
         model, Cmd.none
 
-    let private select concept model =
-        let model' =
-            let firstOpt, secondOpt =
-                if model.FirstOpt.IsNone then
-                    assert(model.SecondOpt.IsNone)
-                    Some concept, None
-                elif model.SecondOpt.IsNone then
-                    model.FirstOpt, Some concept
-                else
-                    model.SecondOpt, Some concept
-            { model with
-                FirstOpt = firstOpt
-                SecondOpt = secondOpt
-                CombinedOpt = None }
-        model', Cmd.none
+    let private setFirst concept model =
+        { model with FirstOpt = Some concept},
+        Cmd.none
+
+    let private setSecond concept model =
+        { model with SecondOpt = Some concept},
+        Cmd.none
 
     let private combine model =
         let model' =
@@ -108,8 +101,10 @@ module Model =
 
     let update msg model =
         match msg with
-            | Select concept ->
-                select concept model
+            | SetFirst concept ->
+                setFirst concept model
+            | SetSecond concept ->
+                setSecond concept model
             | Combine ->
                 combine model
             | Upsert (concept, gen, isNew) ->
