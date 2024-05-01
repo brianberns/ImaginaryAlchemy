@@ -60,14 +60,17 @@ body {
     margin: 5px;
     cursor: default;
     background-color: #f2cc8f;
+    min-width: 100px;
 }
 
 .concept {
+    margin-left: 5px;
     margin-right: 5px;
 }
 
 .generation {
     margin-left: 5px;
+    margin-right: 5px;
 }
 
 .concept-cards {
