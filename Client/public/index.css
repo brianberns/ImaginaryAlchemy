@@ -11,6 +11,7 @@ body {
 #workspace {
     display: grid;
     grid-template-columns: 45% 10% 45%;
+    margin: 30px;
 }
 
 #combined-concept {
@@ -72,6 +73,7 @@ body {
 .concept-cards {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
 }
 
 .empty-concept {
