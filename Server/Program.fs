@@ -84,7 +84,7 @@ module Program =
                 let newGen = (max genFirst genSecond) + 1
                 let isNew =
                     match Data.tryFind concept with
-                        | Some oldGen when oldGen >= newGen ->
+                        | Some oldGen when oldGen <= newGen ->
                             false
                         | _ ->
                             Data.upsert concept newGen first second
