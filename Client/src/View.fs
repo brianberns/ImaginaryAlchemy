@@ -1,12 +1,11 @@
 ﻿namespace ImaginaryAlchemy
 
+open System
 open Feliz
 
 module View =
 
-    let private renderConceptCard
-        concept
-        gen =
+    let private renderConceptCard concept gen =
         Html.div [
             prop.className "concept-card"
             prop.children [
@@ -16,8 +15,9 @@ module View =
                 ]
                 Html.span [
                     prop.className "generation"
-                    prop.innerHtml
-                        (String.replicate gen "&bull;")
+                    let html =
+                        $"{String('✦', gen / 5)}{String('•', gen % 5)}"
+                    prop.innerHtml html
                 ]
             ]
             prop.draggable true
