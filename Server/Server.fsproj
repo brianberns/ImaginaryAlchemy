@@ -18,13 +18,12 @@
     <Compile Include="Program.fs" />
   </ItemGroup>
 
-  <ItemGroup />
-
   <ItemGroup>
     <PackageReference Include="Fable.Remoting.Suave" Version="4.38.0" />
     <PackageReference Include="FSharp.Control.AsyncSeq" Version="3.2.1" />
     <PackageReference Include="LLamaSharp" Version="0.11.2" />
     <PackageReference Include="LLamaSharp.Backend.Cuda11" Version="0.11.2" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.4" />
   </ItemGroup>
 
 </Project>

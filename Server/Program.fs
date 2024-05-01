@@ -1,6 +1,6 @@
 ﻿namespace ImaginaryAlchemy
 
-open System.Collections.Generic
+open System
 
 open Suave
 open Suave.Logging
@@ -9,18 +9,65 @@ open Suave.Operators
 open Fable.Remoting.Server
 open Fable.Remoting.Suave
 
-module Program =
+open Microsoft.Data.Sqlite
 
-    let private genDict =
-        [
-            "Earth", 0
-            "Air", 0
-            "Fire", 0
-            "Water", 0
-            "Steam", 1
-        ]
-            |> Seq.map KeyValuePair
-            |> Dictionary<_, _>
+module Data =
+
+    let connection =
+        new SqliteConnection("Data Source=Alchemy.db")
+
+    do connection.Open()
+
+    let private addParm name dbType (cmd : SqliteCommand) =
+        cmd.Parameters.Add(name, dbType)
+            |> ignore
+
+    let private tryFindCmd =
+        let cmd =
+            connection.CreateCommand(
+                CommandText =
+                    "select Generation \
+                    from Concept \
+                    where Name = $Name;")
+        addParm "$Name" SqliteType.Text cmd
+        cmd
+
+    let tryFind (concept : Concept) =
+        tryFindCmd.Parameters["$Name"].Value <- concept
+        let value = tryFindCmd.ExecuteScalar()
+        if isNull value then None
+        else Some (Convert.ToInt32 value)
+
+    let private upsertCmd =
+        let cmd =
+            connection.CreateCommand(
+                CommandText =
+                    "insert into Concept (Name, Generation, First, Second) \
+                    values ($Name, $Generation, $First, $Second) \
+                    on conflict (Name) do \
+                    update set Name = $Name,
+                    Generation = $Generation,
+                    First = $First,
+                    Second = $Second;")
+        addParm "$Name" SqliteType.Text cmd
+        addParm "$Generation" SqliteType.Integer cmd
+        addParm "$First" SqliteType.Text cmd
+        addParm "$Second" SqliteType.Text cmd
+        cmd
+
+    let upsert
+        (concept : Concept)
+        (generation : int)
+        (first : Concept)
+        (second : Concept) =
+        upsertCmd.Parameters["$Name"].Value <- concept
+        upsertCmd.Parameters["$Generation"].Value <- generation
+        upsertCmd.Parameters["$First"].Value <- first
+        upsertCmd.Parameters["$Second"].Value <- second
+        let nRows = upsertCmd.ExecuteNonQuery()
+        assert(nRows = 1)
+
+module Program =
 
     let private memoize oracle =
         Oracle.combine oracle
@@ -29,18 +76,18 @@ module Program =
             |> curry
 
     let private apply combine first second =
-        lock genDict (fun () ->
+        lock Data.connection (fun () ->
             option {
-                let! genFirst = Dictionary.tryFind first genDict
-                let! genSecond = Dictionary.tryFind second genDict
+                let! genFirst = Data.tryFind first
+                let! genSecond = Data.tryFind second
                 let! concept = combine first second
                 let newGen = (max genFirst genSecond) + 1
                 let isNew =
-                    match Dictionary.tryFind concept genDict with
+                    match Data.tryFind concept with
                         | Some oldGen when oldGen >= newGen ->
                             false
                         | _ ->
-                            genDict[concept] <- newGen
+                            Data.upsert concept newGen first second
                             true
                 return concept, isNew
             })
