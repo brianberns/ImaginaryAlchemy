@@ -2,6 +2,7 @@
     /* https://coolors.co/e63946-ec9a9a-f1faee-cdeae5-a8dadc-457b9d-1d3557 */
     --red-pantone: #e63946ff;
     --salmon-pink: #ec9a9aff;
+    --pale-dogwood: #efcac4ff;
     --honeydew: #f1faeeff;
     --mint-green: #cdeae5ff;
     --non-photo-blue: #a8dadcff;
@@ -19,7 +20,12 @@
 #workspace {
     display: grid;
     grid-template-columns: 45% 10% 45%;
-    margin: 30px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 20px;
+    margin-left: 100px;
+    margin-right: 100px;
+    background-color: var(--cerulean);
 }
 
 #combined-concept {
@@ -44,8 +50,8 @@
     justify-self: center;
     align-self: center;
     cursor: inherit;
-    border: solid 1px black;
-    background-color: var(--salmon-pink);
+    border: solid 1px white;
+    background-color: var(--mint-green);
     font-size: xx-large;
 }
 
@@ -67,7 +73,7 @@
     padding-right: 5px;
     margin: 5px;
     cursor: default;
-    background-color: var(--non-photo-blue);
+    background-color: var(--mint-green);
     min-width: 100px;
 }
 
@@ -89,7 +95,7 @@
 
 .empty-concept {
     display: inline-block;
-    border: dashed 1px black;
+    border: dashed 1px white;
     margin: 5px;
     cursor: inherit;
     width: 150px;
