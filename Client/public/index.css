@@ -1,7 +1,15 @@
-body {
+:root {
+    /* https://coolors.co/e63946-ec9a9a-f1faee-cdeae5-a8dadc-457b9d-1d3557 */
+    --red-pantone: #e63946ff;
+    --salmon-pink: #ec9a9aff;
+    --honeydew: #f1faeeff;
+    --mint-green: #cdeae5ff;
+    --non-photo-blue: #a8dadcff;
+    --cerulean: #457b9dff;
+    --berkeley-blue: #1d3557ff;
     font-size: xx-large;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f4f1de;
+    background-color: var(--honeydew);
 }
 
 .loading {
@@ -37,7 +45,7 @@ body {
     align-self: center;
     cursor: inherit;
     border: solid 1px black;
-    background-color: #e07a5f;
+    background-color: var(--salmon-pink);
     font-size: xx-large;
 }
 
@@ -59,7 +67,7 @@ body {
     padding-right: 5px;
     margin: 5px;
     cursor: default;
-    background-color: #f2cc8f;
+    background-color: var(--non-photo-blue);
     min-width: 100px;
 }
 
