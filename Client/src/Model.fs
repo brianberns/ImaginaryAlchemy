@@ -47,11 +47,15 @@ module Model =
         model, Cmd.none
 
     let private setFirst concept model =
-        { model with FirstOpt = Some concept},
+        { model with
+            FirstOpt = Some concept
+            CombinedOpt = None },
         Cmd.none
 
     let private setSecond concept model =
-        { model with SecondOpt = Some concept},
+        { model with
+            SecondOpt = Some concept
+            CombinedOpt = None },
         Cmd.none
 
     let private combine model =

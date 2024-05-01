@@ -1,4 +1,4 @@
-namespace ImaginaryAlchemy
+﻿namespace ImaginaryAlchemy
 
 open Feliz
 
@@ -113,7 +113,7 @@ module View =
 
                 Html.button [
                     prop.id "combine"
-                    prop.text "Combine"
+                    prop.text "+"
                     prop.onClick (fun _ ->
                         Combine |> dispatch)
                     prop.disabled

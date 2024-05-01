@@ -1,6 +1,7 @@
 body {
     font-size: xx-large;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f1de;
 }
 
 .loading {
@@ -9,7 +10,7 @@ body {
 
 #workspace {
     display: grid;
-    grid-template-columns: 40% 20% 40%;
+    grid-template-columns: 45% 10% 45%;
 }
 
 #combined-concept {
@@ -34,7 +35,14 @@ body {
     justify-self: center;
     align-self: center;
     cursor: inherit;
+    border: solid 1px black;
+    background-color: #e07a5f;
+    font-size: xx-large;
 }
+
+    #combine:disabled {
+        background-color: initial;
+    }
 
 #right-concept {
     grid-row: 2;
@@ -50,6 +58,7 @@ body {
     padding-right: 5px;
     margin: 5px;
     cursor: default;
+    background-color: #f2cc8f;
 }
 
 .concept {
@@ -58,6 +67,11 @@ body {
 
 .generation {
     margin-left: 5px;
+}
+
+.concept-cards {
+    display: flex;
+    justify-content: center;
 }
 
 .empty-concept {
