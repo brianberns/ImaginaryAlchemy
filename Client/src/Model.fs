@@ -29,16 +29,8 @@ module Model =
 
     let init () =
         let model =
-            let conceptMap =
-                Map [
-                    "Earth", 0
-                    "Fire", 0
-                    "Water", 0
-                    "Air", 0
-                    "Steam", 1
-                ]
             {
-                ConceptMap = conceptMap
+                ConceptMap = Settings.Current.ConceptMap
                 FirstOpt = None
                 SecondOpt = None
                 CombinedOpt = None
@@ -96,6 +88,10 @@ module Model =
                         model.ConceptMap
                 CombinedOpt = Some concept
                 IsLoading = false }
+        Settings.save {
+            Settings.Current with
+                ConceptMap = model'.ConceptMap
+        }
         model', Cmd.none
 
     let private fail model =
