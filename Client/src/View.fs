@@ -137,7 +137,7 @@ module View =
 
     let private renderConceptCards model =
         Html.div [
-            prop.className "concept-cards"
+            prop.id "concept-cards"
             model.ConceptMap
                 |> Map.toSeq
                 |> Seq.sortBy (fun (concept, gen) ->

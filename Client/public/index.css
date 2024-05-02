@@ -87,10 +87,11 @@
     margin-right: 5px;
 }
 
-.concept-cards {
+#concept-cards {
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
+    flex-grow: 1;
 }
 
 .empty-concept {
