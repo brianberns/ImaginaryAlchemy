@@ -16,7 +16,7 @@ module View =
                 Html.span [
                     prop.className "generation"
                     let html =
-                        $"{String('✦', gen / 5)}{String('•', gen % 5)}"
+                        $"{String('▪', gen/25)}{String('•', (gen%25)/5)}{String('◦', gen%5)}"
                     prop.innerHtml html
                 ]
             ]
