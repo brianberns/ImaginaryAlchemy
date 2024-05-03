@@ -47,7 +47,7 @@
     grid-column: 2;
     height: 80%;
     width: 80%;
-    max-width: 100px;
+    max-width: 50px;
     justify-self: center;
     align-self: center;
     cursor: inherit;
@@ -55,6 +55,7 @@
     background-color: var(--mint-green);
     font-size: 100%;
     padding: 0px;
+    border-radius: 5px;
 }
 
     #combine:disabled {
@@ -78,6 +79,7 @@
     background-color: var(--mint-green);
     min-width: 80px;
     min-height: 30px;
+    border-radius: 5px;
 }
 
 .concept {
@@ -106,6 +108,7 @@
     cursor: inherit;
     width: 100px;
     height: 30px;
+    border-radius: 5px;
 }
 
 .invisible {
