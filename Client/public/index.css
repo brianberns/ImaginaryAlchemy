@@ -52,7 +52,8 @@
     cursor: inherit;
     border: solid 1px white;
     background-color: var(--mint-green);
-    font-size: 20px;
+    font-size: 100%;
+    padding: 0px;
 }
 
     #combine:disabled {
