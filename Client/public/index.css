@@ -20,6 +20,7 @@
 #workspace {
     display: grid;
     grid-template-columns: 40% 20% 40%;
+    row-gap: 10px;
     margin-top: 20px;
     margin-bottom: 20px;
     padding: 20px;
