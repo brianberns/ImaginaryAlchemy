@@ -9,11 +9,11 @@ module View =
         Html.div [
             prop.className "concept-card"
             prop.children [
-                Html.span [
+                Html.div [
                     prop.className "concept"
                     prop.text (concept : Concept)
                 ]
-                Html.span [
+                Html.div [
                     prop.className "generation"
                     prop.text $"{gen}"
                 ]
