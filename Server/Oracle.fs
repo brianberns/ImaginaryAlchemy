@@ -18,6 +18,7 @@ type Oracle =
 
 module Oracle =
 
+    // https://huggingface.co/QuantFactory/Meta-Llama-3-8B-Instruct-GGUF/tree/main
     let private modelPath =
         @"C:\Users\brian\source\repos\ImaginaryAlchemy\Server\Meta-Llama-3-8B-Instruct.Q4_K_M.gguf"
 
@@ -34,7 +35,6 @@ module Oracle =
 
     let create () =
 
-        // https://huggingface.co/QuantFactory/Meta-Llama-3-8B-Instruct-GGUF/tree/main
         let executor =
             let modelParams = ModelParams(modelPath, GpuLayerCount = 100)
             let model = LLamaWeights.LoadFromFile(modelParams)
@@ -44,11 +44,13 @@ module Oracle =
                 Temperature = 0.0f,
                 AntiPrompts = [antiPrompt],
                 MaxTokens = 10)
+
         // https://www.reddit.com/r/learnprogramming/comments/4yoap9/large_word_list_of_english_nouns/
         let conceptSet =
             File.ReadLines("nouns.txt")
                 |> Seq.map normalize
                 |> set
+
         {
             Executor = executor
             InferenceParams = inferenceParams
