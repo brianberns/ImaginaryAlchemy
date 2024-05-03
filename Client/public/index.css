@@ -8,7 +8,7 @@
     --non-photo-blue: #a8dadcff;
     --cerulean: #457b9dff;
     --berkeley-blue: #1d3557ff;
-    font-size: 2.5dvh;
+    font-size: 25px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--honeydew);
 }
@@ -19,12 +19,12 @@
 
 #workspace {
     display: grid;
-    grid-template-columns: 45% 10% 45%;
-    margin-top: 2dvh;
-    margin-bottom: 2dvh;
-    padding: 2dvh;
-    margin-left: 10dvh;
-    margin-right: 10dvh;
+    grid-template-columns: 40% 20% 40%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    padding: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
     background-color: var(--cerulean);
 }
 
@@ -52,7 +52,7 @@
     cursor: inherit;
     border: solid 1px white;
     background-color: var(--mint-green);
-    font-size: xx-large;
+    font-size: 20px;
 }
 
     #combine:disabled {
@@ -71,21 +71,21 @@
     justify-content: center;
     align-items: center;
     border: solid 1px black;
-    margin: 0.5dvh;
+    margin: 5px;
     cursor: default;
     background-color: var(--mint-green);
-    min-width: 10dvh;
+    min-width: 80px;
 }
 
 .concept {
-    margin-left: 1dvh;
-    margin-right: 0.5dvh;
+    margin-left: 10px;
+    margin-right: 5px;
 }
 
 .generation {
-    margin-left: 0.5dvh;
-    margin-right: 1dvh;
-    font-size: 1.5dvh;
+    margin-left: 5px;
+    margin-right: 10px;
+    font-size: 15px;
 }
 
 #concept-cards {
@@ -98,9 +98,9 @@
 .empty-concept {
     display: inline-block;
     border: dashed 1px white;
-    margin: 0.5dvh;
+    margin: 5px;
     cursor: inherit;
-    width: 15dvh;
+    width: 100px;
 }
 
 .invisible {
