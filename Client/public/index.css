@@ -8,7 +8,7 @@
     --non-photo-blue: #a8dadcff;
     --cerulean: #457b9dff;
     --berkeley-blue: #1d3557ff;
-    font-size: 25px;
+    font-size: 15px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--honeydew);
 }
@@ -47,6 +47,7 @@
     grid-column: 2;
     height: 80%;
     width: 80%;
+    max-width: 100px;
     justify-self: center;
     align-self: center;
     cursor: inherit;
@@ -76,17 +77,18 @@
     cursor: default;
     background-color: var(--mint-green);
     min-width: 80px;
+    min-height: 30px;
 }
 
 .concept {
-    margin-left: 10px;
-    margin-right: 5px;
+    margin-left: 5px;
+    margin-right: 2.5px;
 }
 
 .generation {
-    margin-left: 5px;
-    margin-right: 10px;
-    font-size: 15px;
+    margin-left: 2.5px;
+    margin-right: 5px;
+    font-size: 10px;
 }
 
 #concept-cards {
@@ -102,6 +104,7 @@
     margin: 5px;
     cursor: inherit;
     width: 100px;
+    height: 30px;
 }
 
 .invisible {
