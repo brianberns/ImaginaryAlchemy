@@ -114,7 +114,8 @@ body, html, #elmish-app {
     align-content: start;
     flex-wrap: wrap;
     flex-grow: 1;
-    overflow-y: auto;
+    overflow-y: scroll;
+    scrollbar-color: var(--mint-green) var(--honeydew);
 }
 
 .empty-concept {
