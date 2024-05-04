@@ -149,6 +149,7 @@ module View =
 
     let render model dispatch =
         Html.div [
+            prop.id "parent"
             if model.IsLoading then
                 prop.className "loading"
             prop.children [

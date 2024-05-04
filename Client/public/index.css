@@ -13,6 +13,19 @@
     background-color: var(--honeydew);
 }
 
+body, html, #elmish-app {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+#parent {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
 .loading {
     cursor: wait;
 }
@@ -79,7 +92,7 @@
     cursor: default;
     background-color: var(--mint-green);
     min-width: 80px;
-    min-height: 30px;
+    height: 30px;
     border-radius: 5px;
 }
 
@@ -98,8 +111,10 @@
 #concept-cards {
     display: flex;
     justify-content: center;
+    align-content: start;
     flex-wrap: wrap;
     flex-grow: 1;
+    overflow-y: auto;
 }
 
 .empty-concept {
