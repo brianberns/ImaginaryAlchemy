@@ -50,40 +50,47 @@ module Model =
             CombinedOpt = None },
         Cmd.none
 
+    let private combineAsync first second () =
+        Alchemy.api.Combine(first, second)
+
+    let private onCombineSuccess model first second gen = function
+        | Ok (concept, isNew) ->
+            let gen' =
+                model.ConceptMap
+                    |> Map.tryFind concept
+                    |> Option.map (min gen)
+                    |> Option.defaultValue gen
+            let newStr =
+                if isNew then " [new!]" else ""
+            Browser.Dom.console.log
+                $"{first} + {second} = {concept}{newStr}"
+            Upsert (concept, gen', isNew)
+        | Error msg ->
+            Browser.Dom.console.log
+                $"{first} + {second} = {msg} [failed]"
+            Fail
+
+    let private onCombineError (exn : exn) =
+        Browser.Dom.window.alert(exn.Message)
+        Fail
+
     let private combine model =
         let model' =
             { model with IsLoading = true }
         let cmd =
             option {
-                let! first = model.FirstOpt
-                let! second = model.SecondOpt
+                let! first = model'.FirstOpt
+                let! second = model'.SecondOpt
                 let gen =
-                    let genFirst = model.ConceptMap[first]
-                    let genSecond = model.ConceptMap[second]
+                    let genFirst = model'.ConceptMap[first]
+                    let genSecond = model'.ConceptMap[second]
                     (max genFirst genSecond) + 1
                 return
-                    Cmd.OfAsync.perform
-                        (fun () ->
-                            Alchemy.api.Combine(
-                                first,
-                                second))
+                    Cmd.OfAsync.either
+                        (combineAsync first second)
                         ()
-                        (function
-                            | Ok (concept, isNew) ->
-                                let gen' =
-                                    model.ConceptMap
-                                        |> Map.tryFind concept
-                                        |> Option.map (min gen)
-                                        |> Option.defaultValue gen
-                                let newStr =
-                                    if isNew then " [new!]" else ""
-                                Browser.Dom.console.log
-                                    $"{first} + {second} = {concept}{newStr}"
-                                Upsert (concept, gen', isNew)
-                            | Error msg ->
-                                Browser.Dom.console.log
-                                    $"{first} + {second} = {msg} [failed]"
-                                Fail)
+                        (onCombineSuccess model' first second gen)
+                        (onCombineError)
             } |> Option.defaultValue Cmd.none
         model', cmd
 
