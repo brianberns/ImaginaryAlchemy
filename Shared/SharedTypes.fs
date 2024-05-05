@@ -15,9 +15,20 @@ module OptionBuilder =
 
 type Concept = string
 
+type CombinationResultType =
+
+    /// Discovery of a new concept.
+    | NewConcept
+
+    /// Discovery of an earlier generation for an existing concept.
+    | NewGeneration
+
+    /// No discovery.
+    | Existing
+
 type IAlchemyApi =
     {
         Combine :
             (Concept * Concept) ->
-                Async<Result<Concept * (*isNew*) bool, string>>
+                Async<Result<Concept * CombinationResultType, string>>
     }

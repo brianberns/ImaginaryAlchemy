@@ -44,9 +44,9 @@ module Data =
                     "insert into Concept (Name, Generation, First, Second) \
                     values ($Name, $Generation, $First, $Second) \
                     on conflict (Name) do \
-                    update set Name = $Name,
-                    Generation = $Generation,
-                    First = $First,
+                    update set \
+                    Generation = $Generation, \
+                    First = $First, \
                     Second = $Second;")
         addParm "$Name" SqliteType.Text cmd
         addParm "$Generation" SqliteType.Integer cmd
@@ -85,14 +85,16 @@ module Program =
                     match combine first second with
                         | Ok concept ->
                             let newGen = (max genFirst genSecond) + 1
-                            let isNew =
+                            let resultType =
                                 match Data.tryFind concept with
-                                    | Some oldGen when oldGen <= newGen ->
-                                        false
-                                    | _ ->
+                                    | Some oldGen when newGen < oldGen ->
                                         Data.upsert concept newGen first second
-                                        true
-                            Ok (concept, isNew)
+                                        NewGeneration
+                                    | Some _ -> Existing
+                                    | None ->
+                                        Data.upsert concept newGen first second
+                                        NewConcept
+                            Ok (concept, resultType)
                         | Error str -> Error str)
                 |> Option.defaultValue (Error "Invalid"))
 

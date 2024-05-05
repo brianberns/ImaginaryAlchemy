@@ -22,7 +22,7 @@ type Message =
     | SetFirst of Concept
     | SetSecond of Concept
     | Combine
-    | Upsert of Concept * (*generation*) int * (*isNew*) bool
+    | Upsert of Concept * (*generation*) int * CombinationResultType
     | Fail
 
 module Model =
@@ -54,20 +54,23 @@ module Model =
         Alchemy.api.Combine(first, second)
 
     let private onCombineSuccess model first second gen = function
-        | Ok (concept, isNew) ->
+        | Ok (concept, resultType) ->
             let gen' =
                 model.ConceptMap
                     |> Map.tryFind concept
                     |> Option.map (min gen)
                     |> Option.defaultValue gen
-            let newStr =
-                if isNew then " [new!]" else ""
-            Browser.Dom.console.log
-                $"{first} + {second} = {concept}{newStr}"
-            Upsert (concept, gen', isNew)
+            let resultTypeStr =
+                match resultType with
+                    | NewConcept ->" [new discovery!!]"
+                    | NewGeneration -> " [new generation!]"
+                    | Existing -> ""
+            Browser.Dom.console.log(
+                $"{first} + {second} = {concept}{resultTypeStr}")
+            Upsert (concept, gen', resultType)
         | Error msg ->
-            Browser.Dom.console.log
-                $"{first} + {second} = {msg} [failed]"
+            Browser.Dom.console.log(
+                $"{first} + {second} = {msg} [failed]")
             Fail
 
     let private onCombineError (exn : exn) =
@@ -94,7 +97,7 @@ module Model =
             } |> Option.defaultValue Cmd.none
         model', cmd
 
-    let private upsert concept gen isNew model =
+    let private upsert concept gen resultType model =
         let model' =
             { model with
                 ConceptMap =
@@ -121,7 +124,7 @@ module Model =
                 setSecond concept model
             | Combine ->
                 combine model
-            | Upsert (concept, gen, isNew) ->
-                upsert concept gen isNew model
+            | Upsert (concept, gen, resultType) ->
+                upsert concept gen resultType model
             | Fail ->
                 fail model
