@@ -82,7 +82,7 @@ module Model =
                                 Upsert (concept, gen', isNew)
                             | Error msg ->
                                 Browser.Dom.console.log
-                                    $"{first} + {second} rejected: {msg}"
+                                    $"{first} + {second} = {msg} (failed)"
                                 Fail)
             } |> Option.defaultValue Cmd.none
         model', cmd
