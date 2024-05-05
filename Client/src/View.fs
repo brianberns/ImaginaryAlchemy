@@ -5,7 +5,7 @@ open Feliz
 
 module View =
 
-    let private renderConceptCard concept gen =
+    let private renderConceptCard concept info =
         Html.div [
             prop.className "concept-card"
             prop.children [
@@ -15,7 +15,7 @@ module View =
                 ]
                 Html.div [
                     prop.className "generation"
-                    prop.text $"{gen}"
+                    prop.text $"{info.Generation}"
                 ]
             ]
             prop.draggable true
@@ -138,8 +138,8 @@ module View =
             prop.id "concept-cards"
             model.ConceptMap
                 |> Map.toSeq
-                |> Seq.sortBy (fun (concept, gen) ->
-                    gen, concept)
+                |> Seq.sortBy (fun (concept, info) ->
+                    -info.Discovered.Ticks, -info.Generation, concept)
                 |> Seq.map (fun (concept, gen) ->
                     renderConceptCard
                         concept

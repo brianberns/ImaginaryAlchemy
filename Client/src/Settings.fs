@@ -1,7 +1,26 @@
 ﻿namespace ImaginaryAlchemy
 
+open System
 open Browser
 open Fable.SimpleJson
+
+type ConceptInfo =
+    {
+        Generation : int
+        Discovered : DateTime
+    }
+
+module ConceptInfo =
+
+    let create gen =
+        let now = DateTime.Now
+        {
+            Generation = gen
+            Discovered = now
+        }
+
+type ConceptMap =
+    Map<Concept, ConceptInfo>
 
 /// User settings.
 type Settings =
@@ -9,7 +28,7 @@ type Settings =
         /// Audio enabled/disabled.
         AudioEnabled : bool
 
-        ConceptMap : Map<Concept, (*generation*) int>
+        ConceptMap : ConceptMap
     }
 
 module Settings =
@@ -20,11 +39,10 @@ module Settings =
             AudioEnabled = true
             ConceptMap =
                 Map [
-                    "Earth", 0
-                    "Fire", 0
-                    "Water", 0
-                    "Air", 0
-                    "Steam", 1
+                    "Earth", ConceptInfo.create 0
+                    "Fire", ConceptInfo.create 0
+                    "Water", ConceptInfo.create 0
+                    "Air", ConceptInfo.create 0
                 ]
         }
 

@@ -11,7 +11,7 @@ module Alchemy =
 
 type Model =
     {
-        ConceptMap : Map<Concept, (*generation*) int>
+        ConceptMap : ConceptMap
         FirstOpt : Option<Concept>
         SecondOpt : Option<Concept>
         CombinedOpt : Option<Concept>
@@ -58,7 +58,8 @@ module Model =
             let gen' =
                 model.ConceptMap
                     |> Map.tryFind concept
-                    |> Option.map (min gen)
+                    |> Option.map (fun info ->
+                        min gen info.Generation)
                     |> Option.defaultValue gen
             let resultTypeStr =
                 match resultType with
@@ -85,8 +86,10 @@ module Model =
                 let! first = model'.FirstOpt
                 let! second = model'.SecondOpt
                 let gen =
-                    let genFirst = model'.ConceptMap[first]
-                    let genSecond = model'.ConceptMap[second]
+                    let genFirst =
+                        model'.ConceptMap[first].Generation
+                    let genSecond =
+                        model'.ConceptMap[second].Generation
                     (max genFirst genSecond) + 1
                 return
                     Cmd.OfAsync.either
@@ -101,7 +104,9 @@ module Model =
         let model' =
             { model with
                 ConceptMap =
-                    Map.add concept gen
+                    Map.add
+                        concept
+                        (ConceptInfo.create gen)
                         model.ConceptMap
                 CombinedOpt = Some concept
                 IsLoading = false }
