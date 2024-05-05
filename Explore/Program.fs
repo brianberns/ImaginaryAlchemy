@@ -64,7 +64,7 @@ module Inventory =
             (Map.empty, pairs)
                 ||> Seq.fold (fun acc (first, second) ->
                     match Oracle.combine oracle first second with
-                        | Some concept when allConcepts.Contains(concept) |> not ->
+                        | Ok concept when allConcepts.Contains(concept) |> not ->
                             acc.Add(concept, Some (first, second))
                         | _ -> acc)
 

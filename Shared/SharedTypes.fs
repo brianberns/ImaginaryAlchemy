@@ -19,5 +19,5 @@ type IAlchemyApi =
     {
         Combine :
             (Concept * Concept) ->
-                Async<Option<Concept * (*isNew*) bool>>
+                Async<Result<Concept * (*isNew*) bool, string>>
     }

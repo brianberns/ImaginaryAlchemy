@@ -3,7 +3,6 @@
 open System
 
 open Suave
-open Suave.Logging
 open Suave.Operators
 
 open Fable.Remoting.Server
@@ -80,17 +79,22 @@ module Program =
             option {
                 let! genFirst = Data.tryFind first
                 let! genSecond = Data.tryFind second
-                let! concept = combine first second
-                let newGen = (max genFirst genSecond) + 1
-                let isNew =
-                    match Data.tryFind concept with
-                        | Some oldGen when oldGen <= newGen ->
-                            false
-                        | _ ->
-                            Data.upsert concept newGen first second
-                            true
-                return concept, isNew
-            })
+                return genFirst, genSecond
+            }
+                |> Option.map (fun (genFirst, genSecond) ->
+                    match combine first second with
+                        | Ok concept ->
+                            let newGen = (max genFirst genSecond) + 1
+                            let isNew =
+                                match Data.tryFind concept with
+                                    | Some oldGen when oldGen <= newGen ->
+                                        false
+                                    | _ ->
+                                        Data.upsert concept newGen first second
+                                        true
+                            Ok (concept, isNew)
+                        | Error str -> Error str)
+                |> Option.defaultValue (Error "Invalid"))
 
     try
 
@@ -106,12 +110,14 @@ module Program =
 
             // create the web service
         let service : WebPart =
-            let logger = Targets.create LogLevel.Info [||]
+            let logger =
+                Logging.Targets.create
+                    Logging.LogLevel.Info [||]
             (Remoting.createApi()
                 |> Remoting.fromValue alchemyApi
                 |> Remoting.buildWebPart)
                 >=> Filters.logWithLevelStructured
-                    LogLevel.Info
+                    Logging.LogLevel.Info
                     logger
                     Filters.logFormatStructured
 

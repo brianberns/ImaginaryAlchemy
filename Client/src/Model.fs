@@ -69,14 +69,21 @@ module Model =
                                 second))
                         ()
                         (function
-                            | Some (concept, isNew) ->
+                            | Ok (concept, isNew) ->
                                 let gen' =
                                     model.ConceptMap
                                         |> Map.tryFind concept
                                         |> Option.map (min gen)
                                         |> Option.defaultValue gen
+                                let newStr =
+                                    if isNew then " (new!)" else ""
+                                Browser.Dom.console.log
+                                    $"{first} + {second} = {concept}{newStr}"
                                 Upsert (concept, gen', isNew)
-                            | None -> Fail)
+                            | Error msg ->
+                                Browser.Dom.console.log
+                                    $"{first} + {second} rejected: {msg}"
+                                Fail)
             } |> Option.defaultValue Cmd.none
         model', cmd
 

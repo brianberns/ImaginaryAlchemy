@@ -112,32 +112,34 @@ module Oracle =
 
             // check for valid input
         if isValid oracle first
-            && isValid oracle second
-            && first <> second then
+            && isValid oracle second then
 
-                // normalize concept order
-            let first, second =
-                min first second,
-                max first second
+            if first = second then
+                Error first
+            else
 
-                // combine concepts
-            let concept =
-                if first = "Fire" && second = "Water" then   // hard-coded example
-                    "Steam"
-                else
-                    infer oracle first second
+                    // normalize concept order
+                let first, second =
+                    min first second,
+                    max first second
 
-                // accept result?
-            match trySingular oracle concept with
-                | Some concept when
-                    concept <> first
-                        && concept <> second ->
-                        use _ = useColor ConsoleColor.Green
-                        printfn $"Accepted: {first} + {second} = {concept}"
-                        Some concept
-                | _ ->
-                    use _ = useColor ConsoleColor.Red
-                    printfn $"Rejected: {first} + {second} = {concept}"
-                    None
+                    // combine concepts
+                let concept =
+                    if first = "Fire" && second = "Water" then   // hard-coded example
+                        "Steam"
+                    else
+                        infer oracle first second
+
+                    // accept result?
+                match trySingular oracle concept with
+                    | Some concept when
+                        concept <> first
+                            && concept <> second ->
+                            use _ = useColor ConsoleColor.Green
+                            Ok concept
+                    | _ ->
+                        use _ = useColor ConsoleColor.Red
+                        Error concept
+
         else
-            None
+            Error "Invalid"
