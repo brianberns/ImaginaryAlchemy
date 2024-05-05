@@ -76,13 +76,13 @@ module Model =
                                         |> Option.map (min gen)
                                         |> Option.defaultValue gen
                                 let newStr =
-                                    if isNew then " (new!)" else ""
+                                    if isNew then " [new!]" else ""
                                 Browser.Dom.console.log
                                     $"{first} + {second} = {concept}{newStr}"
                                 Upsert (concept, gen', isNew)
                             | Error msg ->
                                 Browser.Dom.console.log
-                                    $"{first} + {second} = {msg} (failed)"
+                                    $"{first} + {second} = {msg} [failed]"
                                 Fail)
             } |> Option.defaultValue Cmd.none
         model', cmd
