@@ -29,8 +29,6 @@ module Oracle =
 > Fire + Water = Steam
 > %s + %s = """
 
-    let private antiPrompt = ">"
-
     let private normalize (concept : Concept) : Concept =
         concept[0..0].ToUpper() + concept[1..].ToLower()
 
@@ -61,20 +59,12 @@ module Oracle =
         concept = normalize concept
             && oracle.ConceptSet.Contains(concept)
 
-    let private useColor color =
-        Console.ForegroundColor <- color
-        {
-            new IDisposable with
-                member _.Dispose() =
-                    Console.ForegroundColor <- ConsoleColor.White
-        }
-
     /// Infers the combination of two concepts.
     let private infer oracle (first : Concept) (second : Concept) =
-        let prompt =
-            (sprintf promptTemplate first second)
-                .Replace("\r", "")
         let req =
+            let prompt =
+                (sprintf promptTemplate first second)
+                    .Replace("\r", "")
             ChatCompletionCreateRequest(
                 Messages =
                     ResizeArray [
@@ -87,16 +77,11 @@ module Oracle =
                 .CreateCompletion(req)
                 .Result
         if resp.Successful then
-            let str =
-                let str =
-                    resp.Choices[0]
-                        .Message
-                        .Content
-                        .TrimEnd()
-                if str.EndsWith(antiPrompt) then
-                    str.Substring(0, str.Length - antiPrompt.Length)
-                else str
-            normalize (str.Trim())
+            resp.Choices[0]
+                .Message
+                .Content
+                .Trim()
+                |> normalize
         else
             failwith resp.Error.Message
 
@@ -147,10 +132,8 @@ module Oracle =
                     | Some concept when
                         concept <> first
                             && concept <> second ->
-                            use _ = useColor ConsoleColor.Green
                             Ok concept
                     | _ ->
-                        use _ = useColor ConsoleColor.Red
                         Error concept
 
         else
