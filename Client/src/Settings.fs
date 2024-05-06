@@ -7,15 +7,17 @@ open Fable.SimpleJson
 type ConceptInfo =
     {
         Generation : int
+        ResultType : CombinationResultType
         Discovered : DateTime
     }
 
 module ConceptInfo =
 
-    let create gen =
+    let create gen resultType =
         let now = DateTime.Now
         {
             Generation = gen
+            ResultType = resultType
             Discovered = now
         }
 
@@ -35,15 +37,18 @@ module Settings =
 
     /// Initial settings.
     let initial =
+        let info = ConceptInfo.create 0 Existing
         {
             AudioEnabled = true
             ConceptMap =
-                Map [
-                    "Earth", ConceptInfo.create 0
-                    "Fire", ConceptInfo.create 0
-                    "Water", ConceptInfo.create 0
-                    "Air", ConceptInfo.create 0
+                [
+                    "Earth"
+                    "Fire"
+                    "Water"
+                    "Air"
                 ]
+                    |> Seq.map (fun concept -> concept, info)
+                    |> Map
         }
 
     /// Local storage key.

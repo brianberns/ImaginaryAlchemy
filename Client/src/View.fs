@@ -4,10 +4,20 @@ open Feliz
 
 module View =
 
+    let private discovery text =
+        Html.div [
+            prop.className "discovery"
+            prop.text (text : string)
+        ]
+
     let private renderConceptCard concept info =
         Html.div [
             prop.className "concept-card"
             prop.children [
+                match info.ResultType with
+                    | NewConcept -> discovery "★★"
+                    | NewGeneration -> discovery "★"
+                    | Existing -> ()
                 Html.div [
                     prop.className "concept"
                     prop.text (concept : Concept)
@@ -53,7 +63,7 @@ module View =
 
     let private renderConceptSpot
         conceptOpt
-        (conceptMap : Map<_, _>)
+        (conceptMap : ConceptMap)
         makeMsgOpt
         dispatch =
         Html.div [

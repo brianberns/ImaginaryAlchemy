@@ -97,6 +97,11 @@ body, html, #elmish-app {
     user-select: none;
 }
 
+.discovery {
+    margin-left: 5px;
+    font-weight: 500;
+}
+
 .concept {
     margin-left: 5px;
     margin-right: 2.5px;

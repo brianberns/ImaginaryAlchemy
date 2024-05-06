@@ -102,12 +102,11 @@ module Model =
 
     let private upsert concept gen resultType model =
         let model' =
+            let info =
+                ConceptInfo.create gen resultType
             { model with
                 ConceptMap =
-                    Map.add
-                        concept
-                        (ConceptInfo.create gen)
-                        model.ConceptMap
+                    Map.add concept info model.ConceptMap
                 CombinedOpt = Some concept
                 IsLoading = false }
         Settings.save {
