@@ -1,6 +1,5 @@
 ﻿namespace ImaginaryAlchemy
 
-open System
 open Feliz
 
 module View =
