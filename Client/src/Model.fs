@@ -53,14 +53,8 @@ module Model =
     let private combineAsync first second () =
         Alchemy.api.Combine(first, second)
 
-    let private onCombineSuccess model first second gen = function
+    let private onCombineSuccess first second gen = function
         | Ok (concept, resultType) ->
-            let gen' =
-                model.ConceptMap
-                    |> Map.tryFind concept
-                    |> Option.map (fun info ->
-                        min gen info.Generation)
-                    |> Option.defaultValue gen
             let resultTypeStr =
                 match resultType with
                     | NewConcept ->" [new discovery!!]"
@@ -68,7 +62,7 @@ module Model =
                     | Existing -> ""
             Browser.Dom.console.log(
                 $"{first} + {second} = {concept}{resultTypeStr}")
-            Upsert (concept, gen', resultType)
+            Upsert (concept, gen, resultType)
         | Error msg ->
             Browser.Dom.console.log(
                 $"{first} + {second} = {msg} [failed]")
@@ -95,18 +89,23 @@ module Model =
                     Cmd.OfAsync.either
                         (combineAsync first second)
                         ()
-                        (onCombineSuccess model' first second gen)
+                        (onCombineSuccess first second gen)
                         (onCombineError)
             } |> Option.defaultValue Cmd.none
         model', cmd
 
     let private upsert concept gen resultType model =
         let model' =
-            let info =
-                ConceptInfo.create gen resultType
+            let conceptMap =
+                match Map.tryFind concept model.ConceptMap with
+                    | Some info when info.Generation <= gen ->
+                        model.ConceptMap
+                    | _ ->
+                        let info =
+                            ConceptInfo.create gen resultType
+                        Map.add concept info model.ConceptMap
             { model with
-                ConceptMap =
-                    Map.add concept info model.ConceptMap
+                ConceptMap = conceptMap
                 CombinedOpt = Some concept
                 IsLoading = false }
         Settings.save {
