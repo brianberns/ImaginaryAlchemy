@@ -3,24 +3,25 @@
 open System
 open System.IO
 
-open FSharp.Control
+open Microsoft.Extensions.Configuration
 
-open LLama
-open LLama.Abstractions
-open LLama.Common
+open OpenAI.GPT3
+open OpenAI.GPT3.Managers
+open OpenAI.GPT3.ObjectModels
+open OpenAI.GPT3.ObjectModels.RequestModels
+
+type Settings =
+    {
+        ApiKey : string
+    }
 
 type Oracle =
     {
-        Executor : ILLamaExecutor
-        InferenceParams : IInferenceParams
+        Service : OpenAIService
         ConceptSet : Set<Concept>
     }
 
 module Oracle =
-
-    // https://huggingface.co/QuantFactory/Meta-Llama-3-8B-Instruct-GGUF/tree/main
-    let private modelPath =
-        @"C:\Users\brian\source\repos\ImaginaryAlchemy\Server\Meta-Llama-3-8B-Instruct.Q4_K_M.gguf"
 
     [<Literal>]
     let private promptTemplate =
@@ -35,15 +36,15 @@ module Oracle =
 
     let create () =
 
-        let executor =
-            let modelParams = ModelParams(modelPath, GpuLayerCount = 100)
-            let model = LLamaWeights.LoadFromFile(modelParams)
-            StatelessExecutor(model, modelParams)
-        let inferenceParams =
-            InferenceParams(
-                Temperature = 0.0f,
-                AntiPrompts = [antiPrompt],
-                MaxTokens = 10)
+        let settings =
+            ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build()
+                .Get<Settings>()
+
+        let service =
+            OpenAiOptions(ApiKey = settings.ApiKey)
+                |> OpenAIService
 
         // https://www.reddit.com/r/learnprogramming/comments/4yoap9/large_word_list_of_english_nouns/
         let conceptSet =
@@ -52,8 +53,7 @@ module Oracle =
                 |> set
 
         {
-            Executor = executor
-            InferenceParams = inferenceParams
+            Service = service
             ConceptSet = conceptSet
         }
 
@@ -74,19 +74,31 @@ module Oracle =
         let prompt =
             (sprintf promptTemplate first second)
                 .Replace("\r", "")
-        let str =
-            oracle.Executor.InferAsync(
-                prompt,
-                oracle.InferenceParams)
-                |> AsyncSeq.ofAsyncEnum
-                |> AsyncSeq.fold (+) ""
-                |> Async.RunSynchronously   // make inference synchronous
-        let str =
-            let str = str.TrimEnd()
-            if str.EndsWith(antiPrompt) then
-                str.Substring(0, str.Length - antiPrompt.Length)
-            else str
-        normalize (str.Trim())
+        let req =
+            ChatCompletionCreateRequest(
+                Messages =
+                    ResizeArray [
+                        ChatMessage.FromUser(prompt)
+                    ],
+                Model = Models.ChatGpt3_5Turbo)
+        let resp =
+            oracle.Service
+                .ChatCompletion
+                .CreateCompletion(req)
+                .Result
+        if resp.Successful then
+            let str =
+                let str =
+                    resp.Choices[0]
+                        .Message
+                        .Content
+                        .TrimEnd()
+                if str.EndsWith(antiPrompt) then
+                    str.Substring(0, str.Length - antiPrompt.Length)
+                else str
+            normalize (str.Trim())
+        else
+            failwith resp.Error.Message
 
     let private trySingular oracle (concept : Concept) =
 
