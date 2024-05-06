@@ -52,7 +52,7 @@ module Inventory =
                         yield newConcept, newConcepts[j]
             }
                 |> Seq.sortBy (fun _ -> Guid.NewGuid())
-                |> Seq.truncate 2000
+                |> Seq.truncate 200
 
         let oldConceptMap =
             Map [
@@ -70,7 +70,7 @@ module Inventory =
 
         create oldConceptMap newConceptMap
 
-    let dump wtr inv =
+    let dump inv =
 
         let entries =
             inv.NewConceptMap
@@ -81,14 +81,14 @@ module Inventory =
                             concept, pair))
 
         for concept, (first, second) in entries do
-            fprintfn wtr $"{concept} = {first} + {second}"
+            printfn $"{concept} = {first} + {second}"
 
-    let rec explore wtr oracle inv =
+    let rec explore oracle inv =
         let inv' = iterate oracle inv
         if not inv'.NewConceptMap.IsEmpty then
-            fprintfn wtr ""
-            dump wtr inv'
-            explore wtr oracle inv'
+            printfn ""
+            dump inv'
+            explore oracle inv'
 
 module Program =
 
@@ -109,8 +109,6 @@ module Program =
         Inventory.create oldConceptMap newConceptMap
 
     try
-        use wtr = new StreamWriter("explore.txt")
-        wtr.AutoFlush <- true
-        Inventory.explore wtr oracle inv
+        Inventory.explore oracle inv
     with exn ->
         printfn $"{exn.Message}"
