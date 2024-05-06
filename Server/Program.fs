@@ -76,25 +76,27 @@ module Program =
 
     let private apply combine first second =
         lock Data.connection (fun () ->
-            option {
-                let! genFirst = Data.tryFind first
-                let! genSecond = Data.tryFind second
-                return genFirst, genSecond
-            }
-                |> Option.map (fun (genFirst, genSecond) ->
+            (Data.tryFind first, Data.tryFind second)
+                ||> Option.lift2 (fun genFirst genSecond ->
                     match combine first second with
                         | Ok concept ->
-                            let newGen = (max genFirst genSecond) + 1
-                            let resultType =
+                            let isNew =
+                                let newGen = (max genFirst genSecond) + 1
                                 match Data.tryFind concept with
-                                    | Some oldGen when newGen < oldGen ->
-                                        Data.upsert concept newGen first second
-                                        NewGeneration
-                                    | Some _ -> Existing
+
+                                        // insert
                                     | None ->
                                         Data.upsert concept newGen first second
-                                        NewConcept
-                            Ok (concept, resultType)
+                                        true
+
+                                        // update
+                                    | Some oldGen when newGen < oldGen ->
+                                        Data.upsert concept newGen first second
+                                        false
+
+                                        // no change
+                                    | Some _ -> false
+                            Ok (concept, isNew)
                         | Error str -> Error str)
                 |> Option.defaultValue (Error "Invalid"))
 

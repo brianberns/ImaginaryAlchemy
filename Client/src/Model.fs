@@ -22,7 +22,7 @@ type Message =
     | SetFirst of Concept
     | SetSecond of Concept
     | Combine
-    | Upsert of Concept * (*generation*) int * CombinationResultType
+    | Upsert of Concept * (*generation*) int * (*isnew*) bool
     | Fail
 
 module Model =
@@ -54,15 +54,13 @@ module Model =
         Alchemy.api.Combine(first, second)
 
     let private onCombineSuccess first second gen = function
-        | Ok (concept, resultType) ->
-            let resultTypeStr =
-                match resultType with
-                    | NewConcept ->" [new discovery!!]"
-                    | NewGeneration -> " [new generation!]"
-                    | Existing -> ""
+        | Ok (concept, isNew) ->
+            let isNewStr =
+                if isNew then " [new!]"
+                else ""
             Browser.Dom.console.log(
-                $"{first} + {second} = {concept}{resultTypeStr}")
-            Upsert (concept, gen, resultType)
+                $"{first} + {second} = {concept}{isNew}")
+            Upsert (concept, gen, isNew)
         | Error msg ->
             Browser.Dom.console.log(
                 $"{first} + {second} = {msg} [failed]")

@@ -7,17 +7,17 @@ open Fable.SimpleJson
 type ConceptInfo =
     {
         Generation : int
-        ResultType : CombinationResultType
+        IsNew : bool
         Discovered : DateTime
     }
 
 module ConceptInfo =
 
-    let create gen resultType =
+    let create gen isNew =
         let now = DateTime.Now
         {
             Generation = gen
-            ResultType = resultType
+            IsNew = isNew
             Discovered = now
         }
 
@@ -37,7 +37,7 @@ module Settings =
 
     /// Initial settings.
     let initial =
-        let info = ConceptInfo.create 0 Existing
+        let info = ConceptInfo.create 0 false
         {
             AudioEnabled = true
             ConceptMap =

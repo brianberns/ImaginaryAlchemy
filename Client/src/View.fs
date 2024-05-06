@@ -4,20 +4,15 @@ open Feliz
 
 module View =
 
-    let private discovery text =
-        Html.div [
-            prop.className "discovery"
-            prop.text (text : string)
-        ]
-
     let private renderConceptCard concept info =
         Html.div [
             prop.className "concept-card"
             prop.children [
-                match info.ResultType with
-                    | NewConcept -> discovery "★"
-                    | NewGeneration -> discovery "☆"
-                    | Existing -> ()
+                if info.IsNew then
+                    Html.div [
+                        prop.className "discovery"
+                        prop.text "★"
+                    ]
                 Html.div [
                     prop.className "concept"
                     prop.text (concept : Concept)

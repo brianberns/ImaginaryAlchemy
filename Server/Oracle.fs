@@ -70,7 +70,7 @@ module Oracle =
                     ResizeArray [
                         ChatMessage.FromUser(prompt)
                     ],
-                Model = Models.ChatGpt3_5Turbo)
+                Model = Models.Gpt_4)
         let resp =
             oracle.Service
                 .ChatCompletion
