@@ -15,8 +15,8 @@ module View =
             prop.className "concept-card"
             prop.children [
                 match info.ResultType with
-                    | NewConcept -> discovery "★★"
-                    | NewGeneration -> discovery "★"
+                    | NewConcept -> discovery "★"
+                    | NewGeneration -> discovery "☆"
                     | Existing -> ()
                 Html.div [
                     prop.className "concept"
