@@ -37,6 +37,11 @@ module ConceptInfo =
 /// Maps each concept to information about the concept.
 type ConceptMap = Map<Concept, ConceptInfo>
 
+type SortMode =
+    | Alphabetical
+    | ByDiscovered
+    | ByLastUsed
+
 /// User settings.
 type Settings =
     {
@@ -45,6 +50,8 @@ type Settings =
 
         /// Concept information persisted on this client.
         ConceptMap : ConceptMap
+
+        SortMode : SortMode
     }
 
 module Settings =
@@ -59,6 +66,7 @@ module Settings =
                     |> Seq.map (fun concept ->
                         concept, info)
                     |> Map
+            SortMode = ByDiscovered
         }
 
     /// Local storage key.

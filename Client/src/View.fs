@@ -163,7 +163,7 @@ module View =
                 |> prop.children
         ]
 
-    let private renderFooter dispatch =
+    let private renderFooter sortMode dispatch =
         Html.div [
             prop.id "footer"
             prop.children [
@@ -172,16 +172,22 @@ module View =
                 ]
                 Html.button [
                     prop.text "A-Z"
+                    if sortMode = Alphabetical then
+                        prop.className "sort-selected"
                     prop.onClick (fun _ ->
                         SetSortMode Alphabetical |> dispatch)
                 ]
                 Html.button [
                     prop.text "When discovered"
+                    if sortMode = ByDiscovered then
+                        prop.className "sort-selected"
                     prop.onClick (fun _ ->
                         SetSortMode ByDiscovered |> dispatch)
                 ]
                 Html.button [
                     prop.text "Last used"
+                    if sortMode = ByLastUsed then
+                        prop.className "sort-selected"
                     prop.onClick (fun _ ->
                         SetSortMode ByLastUsed |> dispatch)
                 ]
@@ -196,6 +202,6 @@ module View =
             prop.children [
                 renderWorkspace model dispatch
                 renderConceptCards model
-                renderFooter dispatch
+                renderFooter model.SortMode dispatch
             ]
         ]        

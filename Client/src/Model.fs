@@ -11,11 +11,6 @@ module Alchemy =
         Remoting.createApi()
             |> Remoting.buildProxy<IAlchemyApi>
 
-type SortMode =
-    | Alphabetical
-    | ByDiscovered
-    | ByLastUsed
-
 /// Immutable model.
 type Model =
     {
@@ -64,9 +59,10 @@ module Model =
     /// Initializes a model from user's current settings.
     let init () =
         let model =
+            let settings = Settings.Current
             {
-                ConceptMap = Settings.Current.ConceptMap
-                SortMode = ByDiscovered
+                ConceptMap = settings.ConceptMap
+                SortMode = settings.SortMode
                 FirstOpt = None
                 SecondOpt = None
                 CombinedOpt = None
@@ -188,7 +184,11 @@ module Model =
         model', Cmd.none
 
     /// Sets the sort mode.
-    let private setSortMode mode model =
+    let private setSortMode mode (model : Model) =
+        Settings.save {
+            Settings.Current with
+                SortMode = mode
+        }
         { model with SortMode = mode }, Cmd.none
 
     /// Concepts failed to combine.
