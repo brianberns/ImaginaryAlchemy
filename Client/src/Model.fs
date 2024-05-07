@@ -11,11 +11,19 @@ module Alchemy =
         Remoting.createApi()
             |> Remoting.buildProxy<IAlchemyApi>
 
+type SortMode =
+    | Alphabetical
+    | ByDiscovered
+    | ByLastUsed
+
 /// Immutable model.
 type Model =
     {
         /// All concepts seen by this client so far.
         ConceptMap : ConceptMap
+
+        /// How to sort concepts.
+        SortMode : SortMode
 
         /// Concept ready to be combined?
         FirstOpt : Option<Concept>
@@ -45,6 +53,9 @@ type Message =
     /// Save result of combining the two concepts.
     | Upsert of Concept * (*generation*) int * (*isnew*) bool
 
+    /// Set sort mode.
+    | SetSortMode of SortMode
+
     /// Concepts could not be combined.
     | Fail
 
@@ -55,6 +66,7 @@ module Model =
         let model =
             {
                 ConceptMap = Settings.Current.ConceptMap
+                SortMode = ByDiscovered
                 FirstOpt = None
                 SecondOpt = None
                 CombinedOpt = None
@@ -175,6 +187,10 @@ module Model =
 
         model', Cmd.none
 
+    /// Sets the sort mode.
+    let private setSortMode mode model =
+        { model with SortMode = mode }, Cmd.none
+
     /// Concepts failed to combine.
     let private fail model =
         let model' =
@@ -192,5 +208,7 @@ module Model =
                 combine model
             | Upsert (concept, gen, isNew) ->
                 upsert concept gen isNew model
+            | SetSortMode mode ->
+                setSortMode mode model
             | Fail ->
                 fail model

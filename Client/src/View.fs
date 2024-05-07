@@ -138,17 +138,54 @@ module View =
         ]
 
     let private renderConceptCards model =
+
+        let sortAlphabetical (concept, info) =
+            concept
+
+        let sortByDiscovered (concept, info) =
+            -info.Discovered.Ticks, -info.Generation, concept
+
+        let sortByLastUsed (concept, info) =
+            -info.LastUsed.Ticks, -info.Generation, concept
+
         Html.div [
             prop.id "concept-cards"
             model.ConceptMap
                 |> Map.toSeq
-                |> Seq.sortBy (fun (concept, info) ->
-                    -info.Discovered.Ticks, -info.Generation, concept)
+                |> match model.SortMode with
+                    | Alphabetical -> Seq.sortBy sortAlphabetical
+                    | ByDiscovered -> Seq.sortBy sortByDiscovered
+                    | ByLastUsed -> Seq.sortBy sortByLastUsed
                 |> Seq.map (fun (concept, gen) ->
                     renderConceptCard
                         concept
                         gen)
                 |> prop.children
+        ]
+
+    let private renderFooter dispatch =
+        Html.div [
+            prop.id "footer"
+            prop.children [
+                Html.span [
+                    prop.text "Sort:"
+                ]
+                Html.button [
+                    prop.text "A-Z"
+                    prop.onClick (fun _ ->
+                        SetSortMode Alphabetical |> dispatch)
+                ]
+                Html.button [
+                    prop.text "When discovered"
+                    prop.onClick (fun _ ->
+                        SetSortMode ByDiscovered |> dispatch)
+                ]
+                Html.button [
+                    prop.text "Last used"
+                    prop.onClick (fun _ ->
+                        SetSortMode ByLastUsed |> dispatch)
+                ]
+            ]
         ]
 
     let render model dispatch =
@@ -159,5 +196,6 @@ module View =
             prop.children [
                 renderWorkspace model dispatch
                 renderConceptCards model
+                renderFooter dispatch
             ]
         ]        

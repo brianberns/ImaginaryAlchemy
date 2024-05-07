@@ -138,3 +138,11 @@ body, html, #elmish-app {
 .invisible {
     visibility: hidden;
 }
+
+#footer {
+    color: var(--honeydew);
+    background-color: var(--cerulean);
+    display: flex;
+    column-gap: 10px;
+    padding: 5px;
+}
