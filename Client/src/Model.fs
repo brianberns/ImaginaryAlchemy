@@ -49,7 +49,7 @@ type Message =
 
 module Model =
 
-    /// Initial model.
+    /// Initializes a model from user's current settings.
     let init () =
         let model =
             {
@@ -61,66 +61,96 @@ module Model =
             }
         model, Cmd.none
 
+    /// Sets a concept to combine.
     let private setFirst concept model =
         { model with
             FirstOpt = Some concept
             CombinedOpt = None },
         Cmd.none
 
+    /// Sets a concept to combine.
     let private setSecond concept model =
         { model with
             SecondOpt = Some concept
             CombinedOpt = None },
         Cmd.none
 
+    /// Asks server to combine the two given concepts asynchronously.
     let private combineAsync first second () =
         Alchemy.api.Combine(first, second)
 
-    let private onCombineSuccess first second gen = function
+    /// On combination response from server.
+    let private onCombineResponse first second gen = function
+
+            // concepts combined
         | Ok (concept, isNew) ->
             let isNewStr =
                 if isNew then " [new!]"
                 else ""
             Browser.Dom.console.log(
-                $"{first} + {second} = {concept}{isNew}")
+                $"{first} + {second} = {concept} ({gen}){isNewStr}")
             Upsert (concept, gen, isNew)
+
+            // concpets wouldn't combine
         | Error msg ->
             Browser.Dom.console.log(
                 $"{first} + {second} = {msg} [failed]")
             Fail
 
+    /// On server error (e.g. server not running).
     let private onCombineError (exn : exn) =
         Browser.Dom.window.alert(exn.Message)
         Fail
 
+    /// Combines two concepts.
     let private combine model =
+
+            // wait for server
         let model' =
             { model with IsLoading = true }
+
         let cmd =
             option {
+                    // concepts to combine
                 let! first = model'.FirstOpt
                 let! second = model'.SecondOpt
+
+                    // determine what the generation of a successful
+                    // combination will be
                 let gen =
                     let genFirst =
                         model'.ConceptMap[first].Generation
                     let genSecond =
                         model'.ConceptMap[second].Generation
                     (max genFirst genSecond) + 1
+
+                    // attempt to combine concepts
                 return
                     Cmd.OfAsync.either
                         (combineAsync first second)
                         ()
-                        (onCombineSuccess first second gen)
+                        (onCombineResponse first second gen)
                         (onCombineError)
             } |> Option.defaultValue Cmd.none
+
         model', cmd
 
+    /// Saves result of combining two concepts.
     let private upsert concept gen isNew model =
+
+            // update this client's knowledge about the resulting concept
         let model' =
             let conceptMap =
                 match Map.tryFind concept model.ConceptMap with
+
+                        // nothing to change
                     | Some info when info.Generation <= gen ->
                         model.ConceptMap
+
+                        // update with new info:
+                        // * either an earlier generation of a concept
+                        //   already known to this client,
+                        // * or a concept not seen before by this client)
                     | _ ->
                         let info =
                             ConceptInfo.discover gen isNew
@@ -129,17 +159,22 @@ module Model =
                 ConceptMap = conceptMap
                 CombinedOpt = Some concept
                 IsLoading = false }
+
+            // persist knowledge on this client
         Settings.save {
             Settings.Current with
                 ConceptMap = model'.ConceptMap
         }
+
         model', Cmd.none
 
+    /// Concepts failed to combine.
     let private fail model =
         let model' =
             { model with IsLoading = false }
         model', Cmd.none
 
+    /// Applies the given message to the given model.
     let update msg model =
         match msg with
             | SetFirst concept ->
