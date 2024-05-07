@@ -2,15 +2,9 @@
 
 open System
 
-open Suave
-open Suave.Operators
-
-open Fable.Remoting.Server
-open Fable.Remoting.Suave
-
-open Microsoft.Data.Sqlite
-
 module Data =
+
+    open Microsoft.Data.Sqlite
 
     let connection =
         new SqliteConnection("Data Source=Alchemy.db")
@@ -66,7 +60,12 @@ module Data =
         let nRows = upsertCmd.ExecuteNonQuery()
         assert(nRows = 1)
 
-module Program =
+module private Remoting =
+
+    open System.IO
+
+    open Fable.Remoting.Server
+    open Fable.Remoting.Suave
 
     let private memoize oracle =
         Oracle.combine oracle
@@ -100,35 +99,41 @@ module Program =
                         | Error str -> Error str)
                 |> Option.defaultValue (Error "Invalid"))
 
-    try
+    let alchemyApi =
+        {
+            Combine =
+                let combine = memoize (Oracle.create ())
+                fun (first, second) ->
+                    async {
+                        return apply combine first second
+                    }
+        }
 
-        let alchemyApi =
-            {
-                Combine =
-                    let combine = memoize (Oracle.create ())
-                    fun (first, second) ->
-                        async {
-                            return apply combine first second
-                        }
-            }
+    /// Build API.
+    let webPart =
+        Remoting.createApi()
+            |> Remoting.fromValue alchemyApi
+            |> Remoting.buildWebPart
 
-            // create the web service
-        let service : WebPart =
-            let logger =
-                Logging.Targets.create
-                    Logging.LogLevel.Info [||]
-            (Remoting.createApi()
-                |> Remoting.fromValue alchemyApi
-                |> Remoting.buildWebPart)
-                >=> Filters.logWithLevelStructured
-                    Logging.LogLevel.Info
-                    logger
-                    Filters.logFormatStructured
+module WebPart =
 
-            // start the web server
-        let config =
-            { defaultConfig with
-                bindings = [ HttpBinding.createSimple HTTP "127.0.0.1" 5000 ] }
-        startWebServer config service
+    open System.IO
+    open System.Reflection
 
-    with exn -> printfn $"{exn.Message}"
+    open Suave
+    open Suave.Filters
+    open Suave.Operators
+
+    /// Web part.
+    let app =
+
+        let dir =
+            Assembly.GetExecutingAssembly().Location
+                |> Path.GetDirectoryName
+        let staticPath = Path.Combine(dir, "public")
+
+        choose [
+            Remoting.webPart
+            Filters.path "/" >=> Files.browseFile staticPath "index.html"
+            GET >=> Files.browse staticPath
+        ]
