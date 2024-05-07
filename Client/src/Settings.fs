@@ -9,6 +9,7 @@ type ConceptInfo =
         Generation : int
         IsNew : bool
         Discovered : DateTime
+        LastUsed : DateTime
     }
 
 module ConceptInfo =
@@ -19,6 +20,7 @@ module ConceptInfo =
             Generation = gen
             IsNew = isNew
             Discovered = now
+            LastUsed = now
         }
 
 type ConceptMap =

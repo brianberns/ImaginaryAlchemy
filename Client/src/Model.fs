@@ -92,7 +92,7 @@ module Model =
             } |> Option.defaultValue Cmd.none
         model', cmd
 
-    let private upsert concept gen resultType model =
+    let private upsert concept gen isNew model =
         let model' =
             let conceptMap =
                 match Map.tryFind concept model.ConceptMap with
@@ -100,7 +100,7 @@ module Model =
                         model.ConceptMap
                     | _ ->
                         let info =
-                            ConceptInfo.create gen resultType
+                            ConceptInfo.create gen isNew
                         Map.add concept info model.ConceptMap
             { model with
                 ConceptMap = conceptMap
@@ -125,7 +125,7 @@ module Model =
                 setSecond concept model
             | Combine ->
                 combine model
-            | Upsert (concept, gen, resultType) ->
-                upsert concept gen resultType model
+            | Upsert (concept, gen, isNew) ->
+                upsert concept gen isNew model
             | Fail ->
                 fail model
