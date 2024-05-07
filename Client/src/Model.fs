@@ -5,28 +5,51 @@ open Elmish
 
 module Alchemy =
 
+    /// Server API.
     let api =
         Remoting.createApi()
             |> Remoting.buildProxy<IAlchemyApi>
 
+/// Immutable model.
 type Model =
     {
+        /// All concepts seen by this client so far.
         ConceptMap : ConceptMap
+
+        /// Concept ready to be combined?
         FirstOpt : Option<Concept>
+
+        /// Concept ready to be combined?
         SecondOpt : Option<Concept>
+
+        /// Result of combining the two concepts?
         CombinedOpt : Option<Concept>
+
+        /// Waiting for server?
         IsLoading : bool
     }
 
+/// Messages that operate on the model.
 type Message =
+
+    /// Set concept to combine.
     | SetFirst of Concept
+
+    /// Set concept to combine
     | SetSecond of Concept
+
+    /// Combine the two concepts.
     | Combine
+
+    /// Save result of combining the two concepts.
     | Upsert of Concept * (*generation*) int * (*isnew*) bool
+
+    /// Concepts could not be combined.
     | Fail
 
 module Model =
 
+    /// Initial model.
     let init () =
         let model =
             {
@@ -100,7 +123,7 @@ module Model =
                         model.ConceptMap
                     | _ ->
                         let info =
-                            ConceptInfo.create gen isNew
+                            ConceptInfo.discover gen isNew
                         Map.add concept info model.ConceptMap
             { model with
                 ConceptMap = conceptMap

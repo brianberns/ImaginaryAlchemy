@@ -4,17 +4,28 @@ open System
 open Browser
 open Fable.SimpleJson
 
+/// Information known about a concept.
 type ConceptInfo =
     {
+        /// Generation in which the concept was created on
+        /// this client.
         Generation : int
+
+        /// Server indication that this client was first to
+        /// discover the concept.
         IsNew : bool
+
+        /// When the concept was discovered by this client.
         Discovered : DateTime
+
+        /// When the concept was last used by this client.
         LastUsed : DateTime
     }
 
 module ConceptInfo =
 
-    let create gen isNew =
+    /// Discovers a concept new to this client.
+    let discover gen isNew =
         let now = DateTime.Now
         {
             Generation = gen
@@ -23,8 +34,8 @@ module ConceptInfo =
             LastUsed = now
         }
 
-type ConceptMap =
-    Map<Concept, ConceptInfo>
+/// Maps each concept to information about the concept.
+type ConceptMap = Map<Concept, ConceptInfo>
 
 /// User settings.
 type Settings =
@@ -32,24 +43,21 @@ type Settings =
         /// Audio enabled/disabled.
         AudioEnabled : bool
 
+        /// Concept information persisted on this client.
         ConceptMap : ConceptMap
     }
 
 module Settings =
 
     /// Initial settings.
-    let initial =
-        let info = ConceptInfo.create 0 false
+    let private initial =
+        let info = ConceptInfo.discover 0 false
         {
             AudioEnabled = true
             ConceptMap =
-                [
-                    "Earth"
-                    "Fire"
-                    "Water"
-                    "Air"
-                ]
-                    |> Seq.map (fun concept -> concept, info)
+                [ "Earth"; "Fire"; "Water"; "Air" ]
+                    |> Seq.map (fun concept ->
+                        concept, info)
                     |> Map
         }
 
