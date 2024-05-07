@@ -93,9 +93,17 @@ module View =
 
                 Html.div [
                     prop.id "combined-concept"
+                    let isNew =
+                        model.CombinedOpt
+                            |> Option.map snd
+                            |> Option.defaultValue false
+                    if isNew then
+                        prop.className "is-new-global"
+                    let combinedOpt =
+                        Option.map fst model.CombinedOpt
                     prop.children [
                         renderConceptSpot
-                            model.CombinedOpt
+                            combinedOpt
                             model.ConceptMap
                             None
                             dispatch

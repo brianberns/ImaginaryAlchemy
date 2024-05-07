@@ -27,7 +27,7 @@ type Model =
         SecondOpt : Option<Concept>
 
         /// Result of combining the two concepts?
-        CombinedOpt : Option<Concept>
+        CombinedOpt : Option<Concept * (*isNew*) bool>
 
         /// Waiting for server?
         IsLoading : bool
@@ -172,7 +172,7 @@ module Model =
                         Map.add concept info model.ConceptMap
             { model with
                 ConceptMap = conceptMap
-                CombinedOpt = Some concept
+                CombinedOpt = Some (concept, isNew)
                 IsLoading = false }
 
             // persist knowledge on this client

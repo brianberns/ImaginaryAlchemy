@@ -115,6 +115,10 @@ body, html, #elmish-app {
     font-size: 10px;
 }
 
+.is-new-global {
+    background-color: var(--red-pantone);
+}
+
 #concept-cards {
     display: flex;
     justify-content: center;
