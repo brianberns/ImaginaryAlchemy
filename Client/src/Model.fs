@@ -1,5 +1,6 @@
 namespace ImaginaryAlchemy
 
+open System
 open Fable.Remoting.Client
 open Elmish
 
@@ -104,36 +105,42 @@ module Model =
 
     /// Combines two concepts.
     let private combine model =
+        option {
+                // concepts to combine
+            let! first = model.FirstOpt
+            let! second = model.SecondOpt
+            let! firstInfo = Map.tryFind first model.ConceptMap
+            let! secondInfo = Map.tryFind second model.ConceptMap
 
-            // wait for server
-        let model' =
-            { model with IsLoading = true }
+                // update timestamp for each input
+            let model' =
+                let now = DateTime.Now
+                let conceptMap =
+                    model.ConceptMap
+                        |> Map.add first
+                            { firstInfo with LastUsed = now }
+                        |> Map.add second
+                            { secondInfo with LastUsed = now }
+                {
+                    model with
+                        IsLoading = true   // waiting for server
+                        ConceptMap = conceptMap
+                }
 
-        let cmd =
-            option {
-                    // concepts to combine
-                let! first = model'.FirstOpt
-                let! second = model'.SecondOpt
-
-                    // determine what the generation of a successful
-                    // combination will be
+                // attempt to combine concepts
+            let cmd =
                 let gen =
-                    let genFirst =
-                        model'.ConceptMap[first].Generation
-                    let genSecond =
-                        model'.ConceptMap[second].Generation
-                    (max genFirst genSecond) + 1
+                    (max
+                        firstInfo.Generation
+                        secondInfo.Generation) + 1
+                Cmd.OfAsync.either
+                    (combineAsync first second)
+                    ()
+                    (onCombineResponse first second gen)
+                    (onCombineError)
 
-                    // attempt to combine concepts
-                return
-                    Cmd.OfAsync.either
-                        (combineAsync first second)
-                        ()
-                        (onCombineResponse first second gen)
-                        (onCombineError)
-            } |> Option.defaultValue Cmd.none
-
-        model', cmd
+            return model', cmd
+        } |> Option.defaultValue (model, Cmd.none)
 
     /// Saves result of combining two concepts.
     let private upsert concept gen isNew model =
