@@ -119042,5 +119042,6 @@ mithril
 mudflow
 sandcastle
 sea foam
+seraphim
 starburst
 storm surge
