@@ -6,9 +6,14 @@ open Elmish
 
 module Alchemy =
 
+    /// Prefix routes with /Alchemy.
+    let routeBuilder typeName methodName = 
+        sprintf "/Alchemy/%s/%s" typeName methodName
+
     /// Server API.
     let api =
         Remoting.createApi()
+            |> Remoting.withRouteBuilder routeBuilder
             |> Remoting.buildProxy<IAlchemyApi>
 
 /// Immutable model.
