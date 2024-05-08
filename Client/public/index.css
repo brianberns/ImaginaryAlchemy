@@ -151,6 +151,10 @@ body, html, #elmish-app {
     padding: 5px;
 }
 
+button {
+    border-radius: 3px;
+}
+
 .sort-selected {
     background-color: var(--mint-green);
 }
