@@ -1,9 +1,9 @@
 ﻿namespace ImaginaryAlchemy
 
-module private Remoting =
+open Fable.Remoting.Server
+open Fable.Remoting.Suave
 
-    open Fable.Remoting.Server
-    open Fable.Remoting.Suave
+module private Remoting =
 
     let private memoize oracle =
         Oracle.combine oracle
@@ -53,26 +53,3 @@ module private Remoting =
         Remoting.createApi()
             |> Remoting.fromValue (alchemyApi dir)
             |> Remoting.buildWebPart
-
-module WebPart =
-
-    open System.IO
-    open System.Reflection
-
-    open Suave
-    open Suave.Filters
-    open Suave.Operators
-
-    /// Web part.
-    let app : WebPart =
-
-        let dir =
-            Assembly.GetExecutingAssembly().Location
-                |> Path.GetDirectoryName
-        let staticPath = Path.Combine(dir, "public")
-
-        choose [
-            Remoting.webPart dir
-            Filters.path "/" >=> Files.browseFile staticPath "index.html"
-            GET >=> Files.browse staticPath
-        ]
