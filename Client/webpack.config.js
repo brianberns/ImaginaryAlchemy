@@ -10,12 +10,13 @@ module.exports = {
     devServer: {
         static: "./public",
         port: 8080,
-        proxy: {
-            '/Alchemy/IAlchemyApi/**': {
+        proxy: [
+            {
+                context: ['/Alchemy/IAlchemyApi/**'],
                 target: "http://localhost:5000/",   // backend server is running on port 5000 during development
                 changeOrigin: true
             }
-        }
+        ]
     },
     module: {
     }
