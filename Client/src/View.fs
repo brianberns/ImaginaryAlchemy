@@ -156,6 +156,9 @@ module View =
         let sortByLastUsed (concept, info) =
             -info.LastUsed.Ticks, -info.Generation, concept
 
+        let sortByGeneration (concept, info) =
+            info.Generation, concept
+
         Html.div [
             prop.id "concept-cards"
             model.ConceptMap
@@ -164,11 +167,25 @@ module View =
                     | Alphabetical -> Seq.sortBy sortAlphabetical
                     | ByDiscovered -> Seq.sortBy sortByDiscovered
                     | ByLastUsed -> Seq.sortBy sortByLastUsed
+                    | ByGeneration -> Seq.sortBy sortByGeneration
                 |> Seq.map (fun (concept, gen) ->
                     renderConceptCard
                         concept
                         gen)
                 |> prop.children
+        ]
+
+    let private renderSortButton
+        buttonMode
+        text
+        actualMode
+        dispatch =
+        Html.button [
+            prop.text (text : string)
+            if actualMode = buttonMode then
+                prop.className "sort-selected"
+            prop.onClick (fun _ ->
+                SetSortMode buttonMode |> dispatch)
         ]
 
     let private renderFooter sortMode dispatch =
@@ -178,27 +195,14 @@ module View =
                 Html.span [
                     prop.text "Sort:"
                 ]
-                Html.button [
-                    prop.text "A-Z"
-                    if sortMode = Alphabetical then
-                        prop.className "sort-selected"
-                    prop.onClick (fun _ ->
-                        SetSortMode Alphabetical |> dispatch)
-                ]
-                Html.button [
-                    prop.text "When discovered"
-                    if sortMode = ByDiscovered then
-                        prop.className "sort-selected"
-                    prop.onClick (fun _ ->
-                        SetSortMode ByDiscovered |> dispatch)
-                ]
-                Html.button [
-                    prop.text "Last used"
-                    if sortMode = ByLastUsed then
-                        prop.className "sort-selected"
-                    prop.onClick (fun _ ->
-                        SetSortMode ByLastUsed |> dispatch)
-                ]
+                renderSortButton Alphabetical "A-Z"
+                    sortMode dispatch
+                renderSortButton ByDiscovered "When discovered"
+                    sortMode dispatch
+                renderSortButton ByLastUsed "Last used"
+                    sortMode dispatch
+                renderSortButton ByGeneration "Generation #"
+                    sortMode dispatch
             ]
         ]
 

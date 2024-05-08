@@ -37,10 +37,20 @@ module ConceptInfo =
 /// Maps each concept to information about the concept.
 type ConceptMap = Map<Concept, ConceptInfo>
 
+/// Order in which concepts are sorted.
 type SortMode =
+
+    /// A-Z.
     | Alphabetical
+
+    /// When discovered.
     | ByDiscovered
+
+    /// Last used.
     | ByLastUsed
+
+    /// Generation number.
+    | ByGeneration
 
 /// User settings.
 type Settings =
@@ -51,6 +61,7 @@ type Settings =
         /// Concept information persisted on this client.
         ConceptMap : ConceptMap
 
+        /// Concept sort mode.
         SortMode : SortMode
     }
 
