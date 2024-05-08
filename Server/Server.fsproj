@@ -19,6 +19,7 @@
     <Compile Include="Prelude.fs" />
     <Compile Include="..\Shared\SharedTypes.fs" />
     <Compile Include="Oracle.fs" />
+    <Compile Include="Data.fs" />
     <Compile Include="WebPart.fs" />
   </ItemGroup>
 
