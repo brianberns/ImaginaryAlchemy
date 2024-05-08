@@ -13,13 +13,13 @@ module private Remoting =
 
     let private apply data combine first second =
         lock data (fun () ->
-            (data.TryFind first, data.TryFind second)
+            (data.GetGeneration first, data.GetGeneration second)
                 ||> Option.lift2 (fun genFirst genSecond ->
                     match combine first second with
                         | Ok concept ->
                             let isNew =
                                 let newGen = (max genFirst genSecond) + 1
-                                match data.TryFind concept with
+                                match data.GetGeneration concept with
 
                                         // insert
                                     | None ->

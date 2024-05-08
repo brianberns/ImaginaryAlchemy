@@ -18,7 +18,15 @@ module App =
         let staticPath = Path.Combine(dir, "public")
 
         choose [
+
+                // API calls
             Remoting.webPart dir
-            Filters.path "/" >=> Files.browseFile staticPath "index.html"
+
+                // root file
+            Filters.path "/"
+                >=> Files.browseFile
+                    staticPath "index.html"
+
+                // other static files
             GET >=> Files.browse staticPath
         ]

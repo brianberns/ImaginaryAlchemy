@@ -5,25 +5,39 @@ open System.IO
 
 open Microsoft.Data.Sqlite
 
+/// Data access API.
 type Data =
     {
-        TryFind : Concept -> Option<int>
-        Upsert : Concept -> int -> Concept -> Concept -> unit
+        /// Fetches generation number of the given concept,
+        /// if it exists.
+        GetGeneration : Concept -> Option<int>
+
+        /// Inserts the given concept.
+        Upsert :
+            (*child concept*) Concept
+            -> (*generation*) int
+            -> (*parent concept*) Concept
+            -> (*parent concept*) Concept
+            -> unit
     }
 
 module Data =
 
+    /// Creates a parameter for the given command.
     let private addParm name dbType (cmd : SqliteCommand) =
         cmd.Parameters.Add(name, dbType)
             |> ignore
 
+    /// Connects to the alchemy database in the given directory.
     let connect dir =
 
+            // open database connection
         let path = Path.Combine(dir, "Alchemy.db")
         let conn = new SqliteConnection($"Data Source={path}")
         conn.Open()
 
-        let tryFindCmd =
+            // command to get a concept's generation number
+        let getGenCmd =
             let cmd =
                 conn.CreateCommand(
                     CommandText =
@@ -33,12 +47,14 @@ module Data =
             addParm "$Name" SqliteType.Text cmd
             cmd
 
-        let tryFind (concept : Concept) =
-            tryFindCmd.Parameters["$Name"].Value <- concept
-            let value = tryFindCmd.ExecuteScalar()
+            // fetches generation number of the given concept
+        let getGen (concept : Concept) =
+            getGenCmd.Parameters["$Name"].Value <- concept
+            let value = getGenCmd.ExecuteScalar()
             if isNull value then None
             else Some (Convert.ToInt32 value)
 
+            // command to insert/update a concept
         let upsertCmd =
             let cmd =
                 conn.CreateCommand(
@@ -56,6 +72,7 @@ module Data =
             addParm "$Second" SqliteType.Text cmd
             cmd
 
+            // inserts/updates a concept
         let upsert
             (concept : Concept)
             (generation : int)
@@ -69,6 +86,6 @@ module Data =
             assert(nRows = 1)
 
         {
-            TryFind = tryFind
+            GetGeneration = getGen
             Upsert = upsert
         }
