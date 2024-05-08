@@ -149,10 +149,13 @@ body, html, #elmish-app {
     display: flex;
     column-gap: 10px;
     padding: 5px;
+    align-items: center;
 }
 
 button {
     border-radius: 3px;
+    min-width: 100px;
+    min-height: 30px;
 }
 
 .sort-selected {
