@@ -102,7 +102,7 @@ module Model =
                 if isNew then " [new!]"
                 else ""
             Browser.Dom.console.log(
-                $"{first} + {second} = {concept} ({gen}){isNewStr}")
+                $"{first} + {second} = {concept} {isNewStr}")
             Upsert (concept, gen, isNew)
 
             // concpets wouldn't combine

@@ -12,7 +12,7 @@ module.exports = {
         port: 8080,
         proxy: {
             '/Alchemy/IAlchemyApi/**': {
-                target: "http://localhost:5000/Alchemy",   // backend server is running on port 5000 during development
+                target: "http://localhost:5000/",   // backend server is running on port 5000 during development
                 changeOrigin: true
             }
         }
