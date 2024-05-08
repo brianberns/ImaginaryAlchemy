@@ -32,11 +32,12 @@ module Oracle =
     let private normalize (concept : Concept) : Concept =
         concept[0..0].ToUpper() + concept[1..].ToLower()
 
-    let create () =
+    let create dir =
 
         let settings =
+            let path = Path.Combine(dir, "appsettings.json")
             ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
+                .AddJsonFile(path)
                 .Build()
                 .Get<Settings>()
 
@@ -46,7 +47,8 @@ module Oracle =
 
         // https://www.reddit.com/r/learnprogramming/comments/4yoap9/large_word_list_of_english_nouns/
         let conceptSet =
-            File.ReadLines("nouns.txt")
+            let path = Path.Combine(dir, "nouns.txt")
+            File.ReadLines(path)
                 |> Seq.map normalize
                 |> set
 

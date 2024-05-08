@@ -62,8 +62,6 @@ module Data =
 
 module private Remoting =
 
-    open System.IO
-
     open Fable.Remoting.Server
     open Fable.Remoting.Suave
 
@@ -99,10 +97,10 @@ module private Remoting =
                         | Error str -> Error str)
                 |> Option.defaultValue (Error "Invalid"))
 
-    let alchemyApi =
+    let alchemyApi dir =
         {
             Combine =
-                let combine = memoize (Oracle.create ())
+                let combine = memoize (Oracle.create dir)
                 fun (first, second) ->
                     async {
                         return apply combine first second
@@ -110,9 +108,9 @@ module private Remoting =
         }
 
     /// Build API.
-    let webPart =
+    let webPart dir =
         Remoting.createApi()
-            |> Remoting.fromValue alchemyApi
+            |> Remoting.fromValue (alchemyApi dir)
             |> Remoting.buildWebPart
 
 module WebPart =
@@ -125,7 +123,7 @@ module WebPart =
     open Suave.Operators
 
     /// Web part.
-    let app =
+    let app : WebPart =
 
         let dir =
             Assembly.GetExecutingAssembly().Location
@@ -133,7 +131,7 @@ module WebPart =
         let staticPath = Path.Combine(dir, "public")
 
         choose [
-            Remoting.webPart
+            Remoting.webPart dir
             Filters.path "/" >=> Files.browseFile staticPath "index.html"
             GET >=> Files.browse staticPath
         ]

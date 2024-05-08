@@ -92,7 +92,7 @@ module Inventory =
 
 module Program =
 
-    let oracle = Oracle.create ()
+    let oracle = Oracle.create "."
 
     let inv =
         let oldConceptMap =
