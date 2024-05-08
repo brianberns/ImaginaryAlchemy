@@ -13,3 +13,7 @@ updates:
     directory: "/Client/src"
     schedule:
       interval: "weekly"
+  - package-ecosystem: "nuget"
+    directory: "/Server"
+    schedule:
+      interval: "weekly"
