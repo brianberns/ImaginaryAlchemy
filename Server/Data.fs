@@ -24,6 +24,20 @@ type Database private =
 
 module Data =
 
+    (*
+     * The Concept table tracks the lowest known generation
+     * number for each concept discovered.
+     *
+     *   Name   | Generation | First | Second
+     *  --------+------------+-------+--------
+     *   Earth  |          0 |       |
+     *   Air    |          0 |       |
+     *   Fire   |          0 |       |
+     *   Water  |          0 |       |
+     *   Steam  |          1 | Fire	 | Water
+     *   Geyser |          2 | Earth | Steam
+     *)
+
     /// Creates a parameter for the given command.
     let private addParm name dbType (cmd : SqliteCommand) =
         cmd.Parameters.Add(name, dbType)
