@@ -50,7 +50,7 @@ module private Remoting =
                 let isNewStr =
                     if isNew then " [new!]"
                     else ""
-                printfn $"{first} + {second} = {concept} {isNewStr}"
+                printfn $"{first} + {second} = {concept}{isNewStr}"
                 return concept, isNew
             })
 
