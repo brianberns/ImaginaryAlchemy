@@ -47,8 +47,8 @@ module private Remoting =
                 return concept, isNew
             })
 
-    /// Creates a function that can combine concepts.
-    let private createCombine dir db =
+    /// Creates a function that can combine concepts asynchronously.
+    let private createAsyncCombine dir db =
 
             // create and memoize an oracle
         let combine =
@@ -65,7 +65,7 @@ module private Remoting =
                     min first second,
                     max first second
 
-                    // combine inputs
+                    // combine inputs synchronously
                 return apply db combine first second
             }
 
@@ -73,7 +73,7 @@ module private Remoting =
     let private alchemyApi dir =
         let db = Data.connect dir
         {
-            Combine = createCombine dir db
+            Combine = createAsyncCombine dir db
         }
 
     /// Build API.
