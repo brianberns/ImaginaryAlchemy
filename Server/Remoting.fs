@@ -5,38 +5,54 @@ open Fable.Remoting.Suave
 
 module private Remoting =
 
+    /// Memoizes the given oracle to prevent redundant queries.
     let private memoize oracle =
         Oracle.combine oracle
             |> uncurry
             |> Prelude.memoize
             |> curry
 
+    /// Combines the given concepts using the given function.
     let private apply db combine first second =
+
+            // lock the database in case we have to change it
         lock db (fun () ->
-            (Data.getGeneration db first,
-            Data.getGeneration db second)
-                ||> Option.lift2 (fun genFirst genSecond ->
-                    match combine first second with
-                        | Ok concept ->
-                            let isNew =
-                                let newGen = (max genFirst genSecond) + 1
-                                match Data.getGeneration db concept with
+            option {
 
-                                        // insert
-                                    | None ->
-                                        Data.upsert db concept newGen first second
-                                        true
+                    // get generation numbers of parent concepts
+                let! genFirst = Data.getGeneration db first
+                let! genSecond = Data.getGeneration db second
 
-                                        // update
-                                    | Some oldGen when newGen < oldGen ->
-                                        Data.upsert db concept newGen first second
-                                        false
+                    // combine concepts
+                let! concept = combine first second
 
-                                        // no change
-                                    | Some _ -> false
-                            Ok (concept, isNew)
-                        | Error str -> Error str)
-                |> Option.defaultValue (Error "Invalid"))
+                    // is this a new concept?
+                let isNew =
+
+                        // compute the new generation number
+                    let newGen = (max genFirst genSecond) + 1
+
+                        // is there an existing generation number for this concept?
+                    match Data.getGeneration db concept with
+
+                        | None ->       // no, it's new!!
+                            Data.upsert db concept newGen first second
+                            true
+
+                        | Some oldGen   // yes, but this is a shorter path!
+                            when newGen < oldGen ->
+                            Data.upsert db concept newGen first second
+                            false
+
+                        | Some _ ->     // yes, and this path isn't any better
+                            false
+
+                let isNewStr =
+                    if isNew then " [new!]"
+                    else ""
+                printfn $"{first} + {second} = {concept} {isNewStr}"
+                return concept, isNew
+            })
 
     let alchemyApi dir =
         let db = Data.connect dir

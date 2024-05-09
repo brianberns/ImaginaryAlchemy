@@ -113,37 +113,31 @@ module Oracle =
             |> Option.orElseWith (test "es")
             |> Option.orElseWith (test "s")
 
-    /// Combines the given concepts.
+    /// Combines the given concepts, if possible.
     let combine oracle (first : Concept) (second : Concept) =
+        option {
 
-            // check for valid input
-        if oracle.ConceptSet.Contains(first)
-            && oracle.ConceptSet.Contains(second) then
+                // check for valid input
+            if oracle.ConceptSet.Contains(first)
+                && oracle.ConceptSet.Contains(second) then
 
-                // can't combine a concept with itself
-            if first = second then
-                Error first
-            else
-                    // normalize concept order
-                let first, second =
-                    min first second,
-                    max first second
+                    // can't combine a concept with itself
+                if first <> second then
 
-                    // combine concepts
-                let concept =
-                    if first = "Fire" && second = "Water" then   // hard-coded example
-                        "Steam"
-                    else
-                        infer oracle first second
+                        // normalize concept order
+                    let first, second =
+                        min first second,
+                        max first second
 
-                    // accept result?
-                match tryFind oracle concept with
-                    | Some concept when
-                        concept <> first
-                            && concept <> second ->
-                            Ok concept
-                    | _ ->
-                        Error concept
+                        // combine concepts
+                    let concept =
+                        if first = "Fire" && second = "Water" then   // hard-coded example
+                            "Steam"
+                        else
+                            infer oracle first second
 
-        else
-            Error "Invalid"
+                        // accept result?
+                    let! concept' = tryFind oracle concept
+                    if concept <> first && concept <> second then
+                        return concept'
+        }

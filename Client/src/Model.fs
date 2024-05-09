@@ -97,7 +97,7 @@ module Model =
     let private onCombineResponse first second gen = function
 
             // concepts combined
-        | Ok (concept, isNew) ->
+        | Some (concept, isNew) ->
             let isNewStr =
                 if isNew then " [new!]"
                 else ""
@@ -106,9 +106,9 @@ module Model =
             Upsert (concept, gen, isNew)
 
             // concpets wouldn't combine
-        | Error msg ->
+        | None ->
             Browser.Dom.console.log(
-                $"{first} + {second} = {msg} [failed]")
+                $"{first} + {second} = [failed]")
             Fail
 
     /// On server error (e.g. server not running).

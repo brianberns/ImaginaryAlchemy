@@ -20,12 +20,10 @@ type Concept = string
 /// Client/server interface.
 type IAlchemyApi =
     {
-        /// Attempts to combine the given concepts
-        /// asynchronously.
+        /// Attempts to combine the given concepts asynchronously.
         Combine :
             (Concept * Concept) ->
                 Async<
-                    Result<
-                        Concept * (*isNew*) bool,
-                        (*error message*) string>>
+                    Option<
+                        Concept * (*isNew*) bool>>
     }
