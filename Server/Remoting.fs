@@ -54,7 +54,8 @@ module private Remoting =
                 return concept, isNew
             })
 
-    let alchemyApi dir =
+    /// Server API.
+    let private alchemyApi dir =
         let db = Data.connect dir
         {
             Combine =

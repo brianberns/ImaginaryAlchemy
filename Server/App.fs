@@ -12,9 +12,12 @@ module App =
     /// Web part.
     let app =
 
+            // get path where the server is running
         let dir =
             Assembly.GetExecutingAssembly().Location
                 |> Path.GetDirectoryName
+
+            // location of static files
         let staticPath = Path.Combine(dir, "public")
 
         choose [
