@@ -1,6 +1,5 @@
 ﻿namespace ImaginaryAlchemy
 
-open System
 open System.IO
 
 open Microsoft.Extensions.Configuration
@@ -10,8 +9,10 @@ open OpenAI.GPT3.Managers
 open OpenAI.GPT3.ObjectModels
 open OpenAI.GPT3.ObjectModels.RequestModels
 
+/// Server-side settings.
 type Settings =
     {
+        /// OpenAI API key. Don't share this!
         ApiKey : string
     }
 
