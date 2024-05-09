@@ -4,27 +4,36 @@ open Feliz
 
 module View =
 
+    /// Renders a single concept "card" containing the name
+    /// of the concept, its generation number, and an is-new
+    /// indicator.
     let private renderConceptCard concept info =
         Html.div [
             prop.className "concept-card"
             prop.children [
+
+                    // is new?
                 if info.IsNew then
                     Html.div [
                         prop.className "discovery"
                         prop.text "★"
                     ]
+
+                    // concept name (e.g. "Water")
                 Html.div [
                     prop.className "concept"
                     prop.text (concept : Concept)
                 ]
+
+                    // generation number (e.g. 10)
                 Html.div [
                     prop.className "generation"
                     prop.text $"{info.Generation}"
                 ]
             ]
+                // allow card to be dragged
             prop.draggable true
             prop.onDragStart (fun evt ->
-                // Audio.enable ()
                 DragData.setConcept concept evt)
         ]
 
@@ -52,10 +61,12 @@ module View =
             prop.onDrop (fun evt ->
                 evt.preventDefault()
                 match allow evt with
-                    | Some msg -> dispatch msg
+                    | Some (msg : Message) -> dispatch msg
                     | None -> ())
         ]
 
+    /// Renders a spot that might (or might not) contain
+    /// a concept card.
     let private renderConceptSpot
         conceptOpt
         (conceptMap : ConceptMap)
@@ -63,12 +74,16 @@ module View =
         dispatch =
         Html.div [
             match conceptOpt with
+
+                    // spot is full
                 | Some concept ->
                     prop.children [
                         renderConceptCard
                             concept
                             conceptMap[concept]
                     ]
+
+                    // spot is empty
                 | None ->
                     prop.className [
                         "empty-concept"
@@ -76,6 +91,8 @@ module View =
                             "invisible"
                     ]
                     prop.innerHtml "&nbsp;"
+
+                // allow concepts to be dragged to the spot?
             match makeMsgOpt with
                 | Some makeMsg ->
                     yield! renderDragDrop
@@ -86,11 +103,14 @@ module View =
                 | None -> ()
         ]
 
+    /// Renders a workspace containing two input spots (left and right)
+    /// and an output spot.
     let private renderWorkspace model dispatch =
         Html.div [
             prop.id "workspace"
             prop.children [
 
+                    // output spot
                 Html.div [
                     prop.id "combined-concept"
                     let isNew =
@@ -109,7 +129,7 @@ module View =
                             dispatch
                     ]
                 ]
-
+                    // left input spot
                 Html.div [
                     prop.id "left-concept"
                     prop.children [
@@ -120,7 +140,7 @@ module View =
                             dispatch
                     ]
                 ]
-
+                    // button that combines the two inputs when clicked
                 Html.button [
                     prop.id "combine"
                     prop.text "+"
@@ -131,7 +151,7 @@ module View =
                             || model.FirstOpt.IsNone
                             || model.SecondOpt.IsNone)
                 ]
-
+                    // right input spot
                 Html.div [
                     prop.id "right-concept"
                     prop.children [
@@ -145,9 +165,10 @@ module View =
             ]
         ]
 
+    /// Renders a sorted collection cards for known concepts.
     let private renderConceptCards model =
 
-        let sortAlphabetical (concept, info) =
+        let sortAlphabetical (concept, _info) =
             concept
 
         let sortByDiscovered (concept, info) =
@@ -175,6 +196,7 @@ module View =
                 |> prop.children
         ]
 
+    /// Renders a sort button.
     let private renderSortButton
         buttonMode
         text
@@ -188,6 +210,7 @@ module View =
                 SetSortMode buttonMode |> dispatch)
         ]
 
+    /// Renders the footer.
     let private renderFooter sortMode dispatch =
         Html.div [
             prop.id "footer"
@@ -206,6 +229,7 @@ module View =
             ]
         ]
 
+    /// Renders a view of the given model.
     let render model dispatch =
         Html.div [
             prop.id "parent"
