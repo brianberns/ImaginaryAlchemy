@@ -1,7 +1,6 @@
 ﻿namespace ImaginaryAlchemy
 
 open System
-open System.IO
 
 type ConceptMap = Map<Concept, Option<Concept * Concept>>
 
