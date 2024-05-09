@@ -118,26 +118,24 @@ module Oracle =
         option {
 
                 // check for valid input
-            if oracle.ConceptSet.Contains(first)
+            if first < second
+                && oracle.ConceptSet.Contains(first)
                 && oracle.ConceptSet.Contains(second) then
 
-                    // can't combine a concept with itself
-                if first <> second then
+                    // normalize concept order
+                let first, second =
+                    min first second,
+                    max first second
 
-                        // normalize concept order
-                    let first, second =
-                        min first second,
-                        max first second
+                    // combine concepts
+                let concept =
+                    if first = "Fire" && second = "Water" then   // hard-coded example
+                        "Steam"
+                    else
+                        infer oracle first second
 
-                        // combine concepts
-                    let concept =
-                        if first = "Fire" && second = "Water" then   // hard-coded example
-                            "Steam"
-                        else
-                            infer oracle first second
-
-                        // accept result?
-                    let! concept' = tryFind oracle concept
-                    if concept <> first && concept <> second then
-                        return concept'
+                    // accept result?
+                let! concept' = tryFind oracle concept
+                if concept <> first && concept <> second then
+                    return concept'
         }

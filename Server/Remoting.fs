@@ -5,13 +5,6 @@ open Fable.Remoting.Suave
 
 module private Remoting =
 
-    /// Memoizes the given oracle to prevent redundant queries.
-    let private memoize oracle =
-        Oracle.combine oracle
-            |> uncurry
-            |> Prelude.memoize
-            |> curry
-
     /// Combines the given concepts using the given function.
     let private apply db combine first second =
 
@@ -54,16 +47,33 @@ module private Remoting =
                 return concept, isNew
             })
 
+    /// Creates a function that can combine concepts.
+    let private createCombine dir db =
+
+            // create and memoize an oracle
+        let combine =
+            Oracle.create dir
+                |> Oracle.combine
+                |> uncurry
+                |> Prelude.memoize
+                |> curry
+
+        fun (first, second) ->
+            async {
+                    // normalize input order
+                let first, second =
+                    min first second,
+                    max first second
+
+                    // combine inputs
+                return apply db combine first second
+            }
+
     /// Server API.
     let private alchemyApi dir =
         let db = Data.connect dir
         {
-            Combine =
-                let combine = memoize (Oracle.create dir)
-                fun (first, second) ->
-                    async {
-                        return apply db combine first second
-                    }
+            Combine = createCombine dir db
         }
 
     /// Build API.
