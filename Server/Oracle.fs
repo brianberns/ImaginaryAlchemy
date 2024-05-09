@@ -94,8 +94,9 @@ module Oracle =
         else
             failwith resp.Error.Message
 
-    /// Converts the given concept to singular, if necessary.
-    let private trySingular oracle (concept : Concept) =
+    /// Tries to find the given concept in the set of possible
+    /// concepts, converting it to singular if necessary.
+    let private tryFind oracle (concept : Concept) =
 
         let test suffix =
             if concept.EndsWith(suffix : string) then
@@ -138,7 +139,7 @@ module Oracle =
                         infer oracle first second
 
                     // accept result?
-                match trySingular oracle concept with
+                match tryFind oracle concept with
                     | Some concept when
                         concept <> first
                             && concept <> second ->
