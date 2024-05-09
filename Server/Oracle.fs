@@ -98,7 +98,7 @@ module Oracle =
     /// concepts, converting it to singular if necessary.
     let private tryFind oracle (concept : Concept) =
 
-        let test suffix =
+        let test suffix () =
             if concept.EndsWith(suffix : string) then
                 let concept' : Concept =
                     concept.Substring(
@@ -109,11 +109,9 @@ module Oracle =
                 else None
             else None
 
-        test ""
-            |> Option.orElseWith (fun () ->
-                test "es")
-            |> Option.orElseWith (fun () ->
-                test "s")
+        test "" ()
+            |> Option.orElseWith (test "es")
+            |> Option.orElseWith (test "s")
 
     /// Combines the given concepts.
     let combine oracle (first : Concept) (second : Concept) =
