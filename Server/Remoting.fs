@@ -11,24 +11,25 @@ module private Remoting =
             |> Prelude.memoize
             |> curry
 
-    let private apply data combine first second =
-        lock data (fun () ->
-            (data.GetGeneration first, data.GetGeneration second)
+    let private apply db combine first second =
+        lock db (fun () ->
+            (Data.getGeneration db first,
+            Data.getGeneration db second)
                 ||> Option.lift2 (fun genFirst genSecond ->
                     match combine first second with
                         | Ok concept ->
                             let isNew =
                                 let newGen = (max genFirst genSecond) + 1
-                                match data.GetGeneration concept with
+                                match Data.getGeneration db concept with
 
                                         // insert
                                     | None ->
-                                        data.Upsert concept newGen first second
+                                        Data.upsert db concept newGen first second
                                         true
 
                                         // update
                                     | Some oldGen when newGen < oldGen ->
-                                        data.Upsert concept newGen first second
+                                        Data.upsert db concept newGen first second
                                         false
 
                                         // no change
@@ -38,13 +39,13 @@ module private Remoting =
                 |> Option.defaultValue (Error "Invalid"))
 
     let alchemyApi dir =
-        let data = Data.connect dir
+        let db = Data.connect dir
         {
             Combine =
                 let combine = memoize (Oracle.create dir)
                 fun (first, second) ->
                     async {
-                        return apply data combine first second
+                        return apply db combine first second
                     }
         }
 

@@ -5,21 +5,22 @@ open System.IO
 
 open Microsoft.Data.Sqlite
 
-/// Data access API.
-type Data =
+/// Database access.
+type Database private =
     {
-        /// Fetches generation number of the given concept,
-        /// if it exists.
-        GetGeneration : Concept -> Option<int>
+        /// Database connection
+        Connection : SqliteConnection
 
-        /// Inserts the given concept.
-        Upsert :
-            (*child concept*) Concept
-            -> (*generation*) int
-            -> (*parent concept*) Concept
-            -> (*parent concept*) Concept
-            -> unit
+        /// Command to fetch generation number of a concept.
+        GetGenerationCmd : SqliteCommand
+
+        /// Command to insert/update a concept.
+        UpsertCmd : SqliteCommand
     }
+
+    interface IDisposable with
+        member db.Dispose() =
+            db.Connection.Dispose()
 
 module Data =
 
@@ -28,7 +29,7 @@ module Data =
         cmd.Parameters.Add(name, dbType)
             |> ignore
 
-    /// Connects to the alchemy database in the given directory.
+    /// Opens the alchemy database in the given directory.
     let connect dir =
 
             // open database connection
@@ -46,13 +47,6 @@ module Data =
                         where Name = $Name;")
             addParm "$Name" SqliteType.Text cmd
             cmd
-
-            // fetches generation number of the given concept
-        let getGen (concept : Concept) =
-            getGenCmd.Parameters["$Name"].Value <- concept
-            let value = getGenCmd.ExecuteScalar()
-            if isNull value then None
-            else Some (Convert.ToInt32 value)
 
             // command to insert/update a concept
         let upsertCmd =
@@ -72,20 +66,30 @@ module Data =
             addParm "$Second" SqliteType.Text cmd
             cmd
 
-            // inserts/updates a concept
-        let upsert
-            (concept : Concept)
-            (generation : int)
-            (first : Concept)
-            (second : Concept) =
-            upsertCmd.Parameters["$Name"].Value <- concept
-            upsertCmd.Parameters["$Generation"].Value <- generation
-            upsertCmd.Parameters["$First"].Value <- first
-            upsertCmd.Parameters["$Second"].Value <- second
-            let nRows = upsertCmd.ExecuteNonQuery()
-            assert(nRows = 1)
-
         {
-            GetGeneration = getGen
-            Upsert = upsert
+            Connection = conn
+            GetGenerationCmd = getGenCmd
+            UpsertCmd = upsertCmd
         }
+
+    /// Fetches the generation number of the given concept,
+    /// if it exists.
+    let getGeneration db (concept : Concept) =
+        db.GetGenerationCmd.Parameters["$Name"].Value <- concept
+        let value = db.GetGenerationCmd.ExecuteScalar()
+        if isNull value then None
+        else Some (Convert.ToInt32 value)
+
+    /// Inserts/updates the given concept.
+    let upsert
+        db
+        (concept : Concept)
+        (generation : int)
+        (firstParent : Concept)
+        (secondParent : Concept) =
+        db.UpsertCmd.Parameters["$Name"].Value <- concept
+        db.UpsertCmd.Parameters["$Generation"].Value <- generation
+        db.UpsertCmd.Parameters["$First"].Value <- firstParent
+        db.UpsertCmd.Parameters["$Second"].Value <- secondParent
+        let nRows = db.UpsertCmd.ExecuteNonQuery()
+        assert(nRows = 1)
