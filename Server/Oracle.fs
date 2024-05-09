@@ -131,7 +131,11 @@ module Oracle =
                     max first second
 
                     // combine concepts
-                let concept = infer oracle first second
+                let concept =
+                    if first = "Fire" && second = "Water" then   // hard-coded example
+                        "Steam"
+                    else
+                        infer oracle first second
 
                     // accept result?
                 match trySingular oracle concept with
