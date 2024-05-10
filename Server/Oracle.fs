@@ -1,13 +1,14 @@
 ﻿namespace ImaginaryAlchemy
 
+open System
 open System.IO
 
 open Microsoft.Extensions.Configuration
 
-open OpenAI.GPT3
-open OpenAI.GPT3.Managers
-open OpenAI.GPT3.ObjectModels
-open OpenAI.GPT3.ObjectModels.RequestModels
+open OpenAI
+open OpenAI.Managers
+open OpenAI.ObjectModels
+open OpenAI.ObjectModels.RequestModels
 
 /// Server-side settings.
 type Settings =
@@ -25,6 +26,10 @@ type Oracle private =
         /// Set of all possible concepts.
         ConceptSet : Set<Concept>
     }
+
+    interface IDisposable with
+        member this.Dispose() =
+            this.Service.Dispose()
 
 module Oracle =
 
@@ -51,8 +56,8 @@ module Oracle =
                     .AddJsonFile(path)
                     .Build()
                     .Get<Settings>()
-            OpenAiOptions(ApiKey = settings.ApiKey)
-                |> OpenAIService
+            new OpenAIService(
+                OpenAiOptions(ApiKey = settings.ApiKey))
 
             // load set of all possible concepts
             // https://www.reddit.com/r/learnprogramming/comments/4yoap9/large_word_list_of_english_nouns
