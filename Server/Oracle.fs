@@ -127,11 +127,6 @@ module Oracle =
                 && oracle.ConceptSet.Contains(first)
                 && oracle.ConceptSet.Contains(second) then
 
-                    // normalize concept order
-                let first, second =
-                    min first second,
-                    max first second
-
                     // combine concepts
                 let concept =
                     if first = "Fire" && second = "Water" then   // hard-coded example
