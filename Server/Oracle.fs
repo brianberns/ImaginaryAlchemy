@@ -136,6 +136,6 @@ module Oracle =
 
                     // accept result?
                 let! concept' = tryFind oracle concept
-                if concept <> first && concept <> second then
+                if concept' <> first && concept' <> second then
                     return concept'
         }
