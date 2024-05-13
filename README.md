@@ -1,2 +1,2 @@
-Fire + Water = Steam
+Fire + Water = Steam<br />
 Earth + Air = ?
