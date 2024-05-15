@@ -91,8 +91,6 @@ module Inventory =
 
 module Program =
 
-    use oracle = Oracle.create "."
-
     let inv =
         let oldConceptMap =
             Map [
@@ -107,7 +105,10 @@ module Program =
             ]
         Inventory.create oldConceptMap newConceptMap
 
-    try
-        Inventory.explore oracle inv
-    with exn ->
-        printfn $"{exn.Message}"
+    do
+        use oracle = Oracle.create "."
+
+        try
+            Inventory.explore oracle inv
+        with exn ->
+            printfn $"{exn.Message}"
