@@ -62,6 +62,9 @@ module Inventory =
         let newConceptMap =
             (Map.empty, pairs)
                 ||> Seq.fold (fun acc (first, second) ->
+                    let first, second =
+                        min first second,
+                        max first second
                     match Oracle.combine oracle first second with
                         | Some concept when allConcepts.Contains(concept) |> not ->
                             acc.Add(concept, Some (first, second))
@@ -92,16 +95,13 @@ module Inventory =
 module Program =
 
     let inv =
-        let oldConceptMap =
-            Map [
-                "Fire", None
-                "Water", None
-            ]
+        let oldConceptMap = Map.empty
         let newConceptMap =
             Map [
                 "Earth", None
                 "Air", None
-                "Steam", Some ("Fire", "Water")
+                "Fire", None
+                "Water", None
             ]
         Inventory.create oldConceptMap newConceptMap
 
