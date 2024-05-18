@@ -67,13 +67,14 @@ module Data =
             let cmd =
                 conn.CreateCommand(
                     CommandText =
-                        "insert into Concept (Name, Generation, First, Second) \
-                        values ($Name, $Generation, $First, $Second) \
+                        "insert into Concept (Name, Generation, First, Second, LastModified) \
+                        values ($Name, $Generation, $First, $Second, datetime()) \
                         on conflict (Name) do \
                         update set \
                         Generation = $Generation, \
                         First = $First, \
-                        Second = $Second;")
+                        Second = $Second,
+                        LastModified = datetime();")
             addParm "$Name" SqliteType.Text cmd
             addParm "$Generation" SqliteType.Integer cmd
             addParm "$First" SqliteType.Text cmd
