@@ -147,9 +147,19 @@ body, html, #elmish-app {
     color: var(--honeydew);
     background-color: var(--cerulean);
     display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#footer-sort {
+    display: flex;
     column-gap: 10px;
     padding: 5px;
     align-items: center;
+}
+
+#footer-toolbar {
+    padding: 5px;
 }
 
 button {
@@ -160,4 +170,10 @@ button {
 
 .sort-selected {
     background-color: var(--mint-green);
+}
+
+.settings-button {
+    width: 24px;
+    margin: 2px;
+    filter: invert(1);
 }

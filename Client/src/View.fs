@@ -215,17 +215,34 @@ module View =
         Html.div [
             prop.id "footer"
             prop.children [
-                Html.span [
-                    prop.text "Sort:"
+                Html.div [
+                    prop.id "footer-sort"
+                    prop.children [
+                        Html.span [
+                            prop.text "Sort:"
+                        ]
+                        renderSortButton Alphabetical "A-Z"
+                            sortMode dispatch
+                        renderSortButton ByGeneration "Generation #"
+                            sortMode dispatch
+                        renderSortButton ByLastUsed "Last used"
+                            sortMode dispatch
+                        renderSortButton ByDiscovered "When discovered"
+                            sortMode dispatch
+                    ]
                 ]
-                renderSortButton Alphabetical "A-Z"
-                    sortMode dispatch
-                renderSortButton ByDiscovered "When discovered"
-                    sortMode dispatch
-                renderSortButton ByLastUsed "Last used"
-                    sortMode dispatch
-                renderSortButton ByGeneration "Generation #"
-                    sortMode dispatch
+                Html.div [
+                    prop.id "footer-toolbar"
+                    prop.children [
+                        Html.img [
+                            prop.className "settings-button"
+                            prop.src "refresh.svg"
+                            prop.onClick (fun _ ->
+                                if Browser.Dom.window.confirm("You will lose all progress. Are you sure?") then
+                                    dispatch Reset)
+                        ]
+                    ]
+                ]
             ]
         ]
 

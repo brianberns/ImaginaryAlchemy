@@ -67,16 +67,18 @@ type Settings =
 
 module Settings =
 
+    let initialConceptMap =
+        let info = ConceptInfo.discover 0 false
+        [ "Earth"; "Fire"; "Water"; "Air" ]
+            |> Seq.map (fun concept ->
+                concept, info)
+            |> Map
+
     /// Initial settings.
     let private initial =
-        let info = ConceptInfo.discover 0 false
         {
             AudioEnabled = true
-            ConceptMap =
-                [ "Earth"; "Fire"; "Water"; "Air" ]
-                    |> Seq.map (fun concept ->
-                        concept, info)
-                    |> Map
+            ConceptMap = initialConceptMap
             SortMode = ByDiscovered
         }
 

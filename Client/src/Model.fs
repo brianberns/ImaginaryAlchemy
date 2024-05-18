@@ -59,6 +59,9 @@ type Message =
     /// Concepts could not be combined.
     | Fail
 
+    /// Resets progress.
+    | Reset
+
 module Model =
 
     /// Initializes a model from user's current settings.
@@ -202,6 +205,21 @@ module Model =
             { model with IsLoading = false }
         model', Cmd.none
 
+    /// Resets progress.
+    let private reset (model : Model) =
+        let model' =
+            { model with
+                ConceptMap = Settings.initialConceptMap
+                FirstOpt = None
+                SecondOpt = None
+                CombinedOpt = None
+                IsLoading = false }
+        Settings.save {
+            Settings.Current with
+                ConceptMap = model'.ConceptMap
+        }
+        model', Cmd.none
+
     /// Applies the given message to the given model.
     let update msg model =
         match msg with
@@ -217,3 +235,5 @@ module Model =
                 setSortMode mode model
             | Fail ->
                 fail model
+            | Reset ->
+                reset model
