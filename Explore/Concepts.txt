@@ -11,7 +11,7 @@ Generation 2
 	Brick = Air + Mud
 	Clay = Dust + Mud
 	Fog = Smoke + Water
-	Geyser = Steam + Water
+	Geyser = Steam + Water ?
 	Haze = Air + Smoke
 	Mountain = Cloud + Earth
 	Obsidian = Lava + Mud
@@ -38,7 +38,7 @@ Generation 3
 	Flood = Rain + Water
 	Fortress = Brick + Obsidian
 	Fountain = Brick + Geyser
-	Geothermal energy = Steam + Volcano
+	Geothermal energy = Steam + Volcano ?
 	Glass = Obsidian + Water
 	Golem = Clay + Swamp
 	Heaven = Cloud + Sky
@@ -47,7 +47,7 @@ Generation 3
 	Kiln = Brick + Fire
 	Marsh = Swamp + Water
 	Meteor = Lava + Sky
-	Mire = Fog + Swamp
+	Mire = Fog + Swamp ?
 	Mist = Fog + Rain
 	Monolith = Clay + Mountain
 	Peat = Ash + Swamp
@@ -74,14 +74,14 @@ Generation 4
 	Canyon = Rain + Sandstone
 	Castle = Building + Fortress
 	Cataclysm = Eruption + Explosion
-	Coal = Ash + Peat
+	Coal = Ash + Peat ?
 	Comet = Meteor + Water
 	Cyclone = Fog + Windstorm
 	Dust devil = Smog + Windstorm
 	Erosion = Acid rain + Sandstone
 	Excavator = Earth + Engine
 	Firebird = Ceramic + Phoenix
-	Foundation = Building + Earth
+	Foundation = Building + Earth ?
 	Hurricane = Steam + Wind
 	Jet = Atmosphere + Engine
 	Leakage = Building + Rain
@@ -105,5 +105,5 @@ Generation 4
 	Turbine = Ceramic + Engine
 	Water tower = Fountain + Skyscraper
 	Whiskey = Peat + Steam
-	Whistle = Brick + Wind
+	Whistle = Brick + Wind ?
 	Windmill = Engine + Wind
