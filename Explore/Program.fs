@@ -72,7 +72,7 @@ module Inventory =
 
         create oldConceptMap newConceptMap
 
-    let dump inv =
+    let dump inv gen =
 
         let entries =
             inv.NewConceptMap
@@ -82,15 +82,16 @@ module Inventory =
                         |> Option.map (fun pair ->
                             concept, pair))
 
+        printfn $"Generation %d{gen}"
         for concept, (first, second) in entries do
-            printfn $"{concept} = {first} + {second}"
+            printfn $"    {concept} = {first} + {second}"
 
-    let rec explore oracle inv =
+    let rec explore oracle inv gen =
         let inv' = iterate oracle inv
         if not inv'.NewConceptMap.IsEmpty then
             printfn ""
-            dump inv'
-            explore oracle inv'
+            dump inv' gen
+            explore oracle inv' (gen + 1)
 
 module Program =
 
@@ -109,6 +110,6 @@ module Program =
         use oracle = Oracle.create "."
 
         try
-            Inventory.explore oracle inv
+            Inventory.explore oracle inv 1
         with exn ->
             printfn $"{exn.Message}"

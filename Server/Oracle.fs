@@ -84,7 +84,8 @@ module Oracle =
                         ChatMessage.FromUser(prompt)
                     ],
                 Model = Models.Gpt_4,
-                Temperature = 0.0f)
+                Temperature = 0.0f,
+                Seed = 0)
         let resp =
             oracle.Service
                 .ChatCompletion
