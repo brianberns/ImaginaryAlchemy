@@ -3,19 +3,10 @@
 open System
 open System.IO
 
-open Microsoft.Extensions.Configuration
-
 open OpenAI
 open OpenAI.Managers
 open OpenAI.ObjectModels
 open OpenAI.ObjectModels.RequestModels
-
-/// Server-side settings.
-type Settings =
-    {
-        /// OpenAI API key. Don't share this!
-        ApiKey : string
-    }
 
 /// Inference oracle.
 type Oracle private =
@@ -50,12 +41,7 @@ module Oracle =
 
             // connect to GPT service
         let service =
-            let settings =
-                let path = Path.Combine(dir, "appsettings.json")
-                ConfigurationBuilder()
-                    .AddJsonFile(path)
-                    .Build()
-                    .Get<Settings>()
+            let settings = Settings.get dir
             new OpenAIService(
                 OpenAiOptions(ApiKey = settings.ApiKey))
 
