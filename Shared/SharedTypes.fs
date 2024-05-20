@@ -13,8 +13,8 @@ module OptionBuilder =
     /// Option computation expression builder.
     let option = OptionBuilder()
 
-/// Something that can be combined with another thing
-/// to produce a new thing.
+/// Something that can be combined with another thing to
+/// produce a new thing.
 type Concept = string
 
 /// Client/server interface.

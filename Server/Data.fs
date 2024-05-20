@@ -100,7 +100,7 @@ module Data =
     /// Gets the combination of the two given concepts.
     /// * None: No row exists (yet) for this combination
     /// * Some None: Parents cannot be combined
-    /// * Some concept: Parents can be comined
+    /// * Some concept: Parents can be combined
     let getCombination
         db
         (first : Concept)
@@ -139,8 +139,11 @@ module Data =
                     values ($First, $Second, $Child, datetime());")
         addParm "$First" first cmd
         addParm "$Second" second cmd
-        match childOpt with
-            | Some child -> addParm "$Child" child cmd
-            | None -> ()
+        do
+            let child =
+                childOpt
+                    |> Option.map box
+                    |> Option.defaultValue DBNull.Value
+            addParm "$Child" child cmd
         let nRows = cmd.ExecuteNonQuery()
         assert(nRows = 1)
