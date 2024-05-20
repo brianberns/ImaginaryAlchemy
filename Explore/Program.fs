@@ -34,7 +34,7 @@ module Inventory =
             NewConceptMap = newConceptMap
         }
 
-    let iterate oracle inv =
+    let iterate (oracle : Oracle) inv =
 
         let allConcepts =
             keySet inv.OldConceptMap
@@ -65,7 +65,7 @@ module Inventory =
                     let first, second =
                         min first second,
                         max first second
-                    match Oracle.combine oracle first second with
+                    match oracle.Combine first second with
                         | Some concept when allConcepts.Contains(concept) |> not ->
                             acc.Add(concept, Some (first, second))
                         | _ -> acc)

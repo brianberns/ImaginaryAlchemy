@@ -5,8 +5,8 @@ open Fable.Remoting.Suave
 
 module private Remoting =
 
-    /// Combines the given concepts using the given function.
-    let private apply db combine first second =
+    /// Combines the given concepts using the given oracle.
+    let private apply db oracle first second =
 
             // lock the database in case we have to change it
         lock db (fun () ->
@@ -18,7 +18,7 @@ module private Remoting =
                 let! genSecond = Data.getGeneration db second
 
                     // combine concepts
-                let! concept = combine first second
+                let! concept = oracle.Combine first second
 
                     // is this a new concept?
                 let isNew =
@@ -52,9 +52,9 @@ module private Remoting =
     let private createAsyncCombine dir db =
 
             // create and memoize an oracle
-        let combine =
+        let oracle =
             Oracle.create dir
-                |> OracleCache.combine db
+                |> OracleCache.create db
 
         fun (first, second) ->
             async {
@@ -64,7 +64,7 @@ module private Remoting =
                     max first second
 
                     // combine inputs synchronously
-                return apply db combine first second
+                return apply db oracle first second
             }
 
     /// Server API.

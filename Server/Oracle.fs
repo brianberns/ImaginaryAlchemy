@@ -9,18 +9,21 @@ open OpenAI.ObjectModels
 open OpenAI.ObjectModels.RequestModels
 
 /// Inference oracle.
-type Oracle private =
+type Oracle =
     {
-        /// GPT service.
-        Service : OpenAIService
+        /// Is it valid to attempt to combine the given concepts?
+        IsValid : Concept -> Concept -> bool
 
-        /// Set of all possible concepts.
-        ConceptSet : Set<Concept>
+        /// Combines the given valid concepts, if possible.
+        Combine : Concept -> Concept -> Option<Concept>
+
+        /// Disposable resource.
+        Resource : IDisposable
     }
 
     interface IDisposable with
         member this.Dispose() =
-            this.Service.Dispose()
+            this.Resource.Dispose()
 
 module Oracle =
 
@@ -34,6 +37,86 @@ module Oracle =
     /// Normlizes the given concept. E.g. "water" -> "Water".
     let private normalize (concept : Concept) : Concept =
         concept[0..0].ToUpper() + concept[1..].ToLower()
+
+    /// Infers the combination of two concepts.
+    let private infer
+        (service : OpenAIService)
+        (first : Concept)
+        (second : Concept) =
+        let req =
+            let prompt =
+                (sprintf promptTemplate first second)
+                    .Replace("\r", "")
+            ChatCompletionCreateRequest(
+                Messages =
+                    ResizeArray [
+                        ChatMessage.FromUser(prompt)
+                    ],
+                Model = Models.Gpt_4,
+                Temperature = 0.0f,
+                Seed = 0)
+        let resp =
+            service
+                .ChatCompletion
+                .CreateCompletion(req)
+                .Result
+        if resp.Successful then
+            resp.Choices[0]
+                .Message
+                .Content
+                .Trim()
+                |> normalize
+        else
+            failwith resp.Error.Message
+
+    /// Tries to find the given concept in the set of possible
+    /// concepts, converting it to singular if necessary.
+    let private tryFind
+        (conceptSet : Set<Concept>)
+        (concept : Concept) =
+
+        let test suffix () =
+            if concept.EndsWith(suffix : string) then
+                let concept' : Concept =
+                    concept.Substring(
+                        0,
+                        concept.Length - suffix.Length)
+                if conceptSet.Contains(concept') then
+                    Some concept'
+                else None
+            else None
+
+        test "" ()
+            |> Option.orElseWith (test "es")
+            |> Option.orElseWith (test "s")
+
+    /// Indicates whether the given parent concepts might be
+    /// validly combined.
+    let private isValid
+        (conceptSet : Set<Concept>)
+        (first : Concept)
+        (second : Concept) =
+        first < second
+            && conceptSet.Contains(first)
+            && conceptSet.Contains(second)
+
+    /// Combines the given concepts, if possible.
+    let private combine service conceptSet first second =
+        option {
+            if isValid conceptSet first second then
+
+                    // combine concepts
+                let concept =
+                    if first = "Fire" && second = "Water" then   // hard-coded example
+                        "Steam"
+                    else
+                        infer service first second
+
+                    // accept result?
+                let! concept' = tryFind conceptSet concept
+                if concept' <> first && concept' <> second then
+                    return concept'
+        }
 
     /// Creates an oracle using the list of possible concepts in the
     /// given directory.
@@ -54,77 +137,7 @@ module Oracle =
                 |> set
 
         {
-            Service = service
-            ConceptSet = conceptSet
-        }
-
-    /// Infers the combination of two concepts.
-    let private infer oracle (first : Concept) (second : Concept) =
-        let req =
-            let prompt =
-                (sprintf promptTemplate first second)
-                    .Replace("\r", "")
-            ChatCompletionCreateRequest(
-                Messages =
-                    ResizeArray [
-                        ChatMessage.FromUser(prompt)
-                    ],
-                Model = Models.Gpt_4,
-                Temperature = 0.0f,
-                Seed = 0)
-        let resp =
-            oracle.Service
-                .ChatCompletion
-                .CreateCompletion(req)
-                .Result
-        if resp.Successful then
-            resp.Choices[0]
-                .Message
-                .Content
-                .Trim()
-                |> normalize
-        else
-            failwith resp.Error.Message
-
-    /// Tries to find the given concept in the set of possible
-    /// concepts, converting it to singular if necessary.
-    let private tryFind oracle (concept : Concept) =
-
-        let test suffix () =
-            if concept.EndsWith(suffix : string) then
-                let concept' : Concept =
-                    concept.Substring(
-                        0,
-                        concept.Length - suffix.Length)
-                if oracle.ConceptSet.Contains(concept') then
-                    Some concept'
-                else None
-            else None
-
-        test "" ()
-            |> Option.orElseWith (test "es")
-            |> Option.orElseWith (test "s")
-
-    /// Indicates whether the given parent concepts might
-    /// by validly combined.
-    let isValid oracle (first : Concept) (second : Concept) =
-        first < second
-            && oracle.ConceptSet.Contains(first)
-            && oracle.ConceptSet.Contains(second)
-
-    /// Combines the given concepts, if possible.
-    let combine oracle first second =
-        assert(isValid oracle first second)
-        option {
-                // combine concepts
-            let concept =
-                if first = "Fire" && second = "Water" then   // hard-coded example
-                    "Steam"
-                else
-                    infer oracle first second
-
-                // accept result?
-            let! concept' = tryFind oracle concept
-            if concept' <> first && concept' <> second then
-                return concept'
+            IsValid = isValid conceptSet
+            Combine = combine service conceptSet
+            Resource = service
         }
