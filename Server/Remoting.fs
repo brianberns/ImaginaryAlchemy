@@ -10,6 +10,7 @@ module private Remoting =
 
             // lock the database in case we have to change it
         lock db (fun () ->
+            use _ = Data.createTransaction db
             option {
 
                     // get generation numbers of parent concepts

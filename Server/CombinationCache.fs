@@ -5,12 +5,13 @@ type Combine = Concept -> Concept -> Option<Concept>
 
 module CombinationCache =
 
-    /// Creates a cache. Not thread-safe.
+    /// Creates a cache.
     let create db (combine : Combine) : Combine =
-        fun first second ->
-            match Data.getCombination db first second with
-                | None ->
-                    let conceptOpt = combine first second
-                    Data.insertCombination db first second conceptOpt
-                    conceptOpt
-                | Some conceptOpt -> conceptOpt
+        lock db (fun () ->
+            fun first second ->
+                match Data.getCombination db first second with
+                    | None ->
+                        let conceptOpt = combine first second
+                        Data.insertCombination db first second conceptOpt
+                        conceptOpt
+                    | Some conceptOpt -> conceptOpt)

@@ -10,15 +10,6 @@ type Database private =
     {
         /// Database connection
         Connection : SqliteConnection
-
-        /// Command to fetch generation number of a concept.
-        GetGenerationCmd : SqliteCommand
-
-        /// Command to insert/update a concept.
-        UpsertConceptCmd : SqliteCommand
-
-        GetCombinationCmd : SqliteCommand
-        InsertCombinationCmd : SqliteCommand
     }
 
     interface IDisposable with
@@ -46,86 +37,36 @@ module Data =
      *  Fire  | Water  | Steam
      *)
 
-    /// Creates a parameter for the given command.
-    let private addParm name dbType (cmd : SqliteCommand) =
-        cmd.Parameters.Add(name, dbType)
+    /// Adds a parameter for the given command.
+    let private addParm name value (cmd : SqliteCommand) =
+        cmd.Parameters.AddWithValue(name, value)
             |> ignore
 
     /// Opens the alchemy database in the given directory.
     let connect dir =
-
-            // open database connection
         let path = Path.Combine(dir, "Alchemy.db")
         let conn = new SqliteConnection($"Data Source={path}")
         conn.Open()
+        { Connection = conn }
 
-            // command to get a concept's generation number
-        let getGenCmd =
-            let cmd =
-                conn.CreateCommand(
-                    CommandText =
-                        "select Generation \
-                        from Concept \
-                        where Name = $Name;")
-            addParm "$Name" SqliteType.Text cmd
-            cmd
-
-            // command to insert/update a concept
-        let upsertConceptCmd =
-            let cmd =
-                conn.CreateCommand(
-                    CommandText =
-                        "insert into Concept (Name, Generation, First, Second, LastModified) \
-                        values ($Name, $Generation, $First, $Second, datetime()) \
-                        on conflict (Name) do \
-                        update set \
-                        Generation = $Generation, \
-                        First = $First, \
-                        Second = $Second,
-                        LastModified = datetime();")
-            addParm "$Name" SqliteType.Text cmd
-            addParm "$Generation" SqliteType.Integer cmd
-            addParm "$First" SqliteType.Text cmd
-            addParm "$Second" SqliteType.Text cmd
-            cmd
-
-            // command to get a combination
-        let getCombinationCmd =
-            let cmd =
-                conn.CreateCommand(
-                    CommandText =
-                        "select Child \
-                        from Combination \
-                        where First = $First \
-                        and Second = $Second;")
-            addParm "$First" SqliteType.Text cmd
-            addParm "$Second" SqliteType.Text cmd
-            cmd
-
-            // command to insert a combination
-        let insertCombinationCmd =
-            let cmd =
-                conn.CreateCommand(
-                    CommandText =
-                        "insert into Combination (First, Second, Child, LastModified) \
-                        values ($First, $Second, $Child, datetime());")
-            addParm "$First" SqliteType.Text cmd
-            addParm "$Second" SqliteType.Text cmd
-            addParm "$Child" SqliteType.Text cmd
-            cmd
-
+    /// Creates a transaction.
+    let createTransaction db =
+        let trans = db.Connection.BeginTransaction()
         {
-            Connection = conn
-            GetGenerationCmd = getGenCmd
-            UpsertConceptCmd = upsertConceptCmd
-            GetCombinationCmd = getCombinationCmd
-            InsertCombinationCmd = insertCombinationCmd
+            new IDisposable with
+                member _.Dispose() = trans.Commit()
         }
 
     /// Fetches the generation number of the given concept,
     /// if it exists.
     let getGeneration db (concept : Concept) =
-        let cmd = db.GetGenerationCmd
+        use cmd =
+            db.Connection.CreateCommand(
+                CommandText =
+                    "select Generation \
+                    from Concept \
+                    where Name = $Name;")
+        addParm "$Name" SqliteType.Text cmd
         cmd.Parameters["$Name"].Value <- concept
         let value = cmd.ExecuteScalar()
         if isNull value then None
@@ -138,11 +79,21 @@ module Data =
         (generation : int)
         (first : Concept)
         (second : Concept) =
-        let cmd = db.UpsertConceptCmd
-        cmd.Parameters["$Name"].Value <- concept
-        cmd.Parameters["$Generation"].Value <- generation
-        cmd.Parameters["$First"].Value <- first
-        cmd.Parameters["$Second"].Value <- second
+        use cmd =
+            db.Connection.CreateCommand(
+                CommandText =
+                    "insert into Concept (Name, Generation, First, Second, LastModified) \
+                    values ($Name, $Generation, $First, $Second, datetime()) \
+                    on conflict (Name) do \
+                    update set \
+                    Generation = $Generation, \
+                    First = $First, \
+                    Second = $Second,
+                    LastModified = datetime();")
+        addParm "$Name" concept cmd
+        addParm "$Generation" generation cmd
+        addParm "$First" first cmd
+        addParm "$Second" second cmd
         let nRows = cmd.ExecuteNonQuery()
         assert(nRows = 1)
 
@@ -154,9 +105,15 @@ module Data =
         db
         (first : Concept)
         (second : Concept) =
-        let cmd = db.GetCombinationCmd
-        cmd.Parameters["$First"].Value <- first
-        cmd.Parameters["$Second"].Value <- second
+        use cmd =
+            db.Connection.CreateCommand(
+                CommandText =
+                    "select Child \
+                    from Combination \
+                    where First = $First \
+                    and Second = $Second;")
+        addParm "$First" first cmd
+        addParm "$Second" second cmd
         use reader = cmd.ExecuteReader()
         let rows =
             [|
@@ -169,17 +126,21 @@ module Data =
             | 1 -> Some rows[0]
             | _ -> failwith "Unexpected"
 
+    /// Inserts a combination of two concepts.
     let insertCombination
         db
         (first : Concept)
         (second : Concept)
-        (conceptOpt : Option<Concept>) =
-        let cmd = db.InsertCombinationCmd
-        cmd.Parameters["$First"].Value <- first
-        cmd.Parameters["$Second"].Value <- second
-        cmd.Parameters["$Child"].Value <-
-            match conceptOpt with
-                | Some concept -> box concept
-                | None -> DBNull.Value
+        (childOpt : Option<Concept>) =
+        use cmd =
+            db.Connection.CreateCommand(
+                CommandText =
+                    "insert into Combination (First, Second, Child, LastModified) \
+                    values ($First, $Second, $Child, datetime());")
+        addParm "$First" first cmd
+        addParm "$Second" second cmd
+        match childOpt with
+            | Some child -> addParm "$Child" child cmd
+            | None -> ()
         let nRows = cmd.ExecuteNonQuery()
         assert(nRows = 1)
