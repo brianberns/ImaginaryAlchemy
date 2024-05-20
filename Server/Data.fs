@@ -15,7 +15,7 @@ type Database private =
         GetGenerationCmd : SqliteCommand
 
         /// Command to insert/update a concept.
-        UpsertCmd : SqliteCommand
+        UpsertConceptCmd : SqliteCommand
     }
 
     interface IDisposable with
@@ -25,8 +25,7 @@ type Database private =
 module Data =
 
     (*
-     * The Concept table tracks the lowest known generation
-     * number for each concept discovered.
+     * The Concept table has one row for each known concept:
      *
      *   Name   | Generation | First | Second
      *  --------+------------+-------+--------
@@ -35,7 +34,6 @@ module Data =
      *   Fire   |          0 |       |
      *   Water  |          0 |       |
      *   Steam  |          1 | Fire	 | Water
-     *   Geyser |          2 | Earth | Steam
      *)
 
     /// Creates a parameter for the given command.
@@ -84,7 +82,7 @@ module Data =
         {
             Connection = conn
             GetGenerationCmd = getGenCmd
-            UpsertCmd = upsertCmd
+            UpsertConceptCmd = upsertCmd
         }
 
     /// Fetches the generation number of the given concept,
@@ -96,15 +94,15 @@ module Data =
         else Some (Convert.ToInt32 value)
 
     /// Inserts/updates the given concept.
-    let upsert
+    let upsertConcept
         db
         (concept : Concept)
         (generation : int)
         (firstParent : Concept)
         (secondParent : Concept) =
-        db.UpsertCmd.Parameters["$Name"].Value <- concept
-        db.UpsertCmd.Parameters["$Generation"].Value <- generation
-        db.UpsertCmd.Parameters["$First"].Value <- firstParent
-        db.UpsertCmd.Parameters["$Second"].Value <- secondParent
-        let nRows = db.UpsertCmd.ExecuteNonQuery()
+        db.UpsertConceptCmd.Parameters["$Name"].Value <- concept
+        db.UpsertConceptCmd.Parameters["$Generation"].Value <- generation
+        db.UpsertConceptCmd.Parameters["$First"].Value <- firstParent
+        db.UpsertConceptCmd.Parameters["$Second"].Value <- secondParent
+        let nRows = db.UpsertConceptCmd.ExecuteNonQuery()
         assert(nRows = 1)

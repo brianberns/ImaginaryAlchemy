@@ -29,12 +29,12 @@ module private Remoting =
                     match Data.getGeneration db concept with
 
                         | None ->       // no, it's new!!
-                            Data.upsert db concept newGen first second
+                            Data.upsertConcept db concept newGen first second
                             true
 
                         | Some oldGen   // yes, but this is a shorter path!
                             when newGen < oldGen ->
-                            Data.upsert db concept newGen first second
+                            Data.upsertConcept db concept newGen first second
                             false
 
                         | Some _ ->     // yes, and this path isn't any better
