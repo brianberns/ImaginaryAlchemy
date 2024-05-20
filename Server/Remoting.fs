@@ -6,7 +6,7 @@ open Fable.Remoting.Suave
 module private Remoting =
 
     /// Combines the given concepts using the given oracle.
-    let private apply db oracle first second =
+    let private combine db oracle first second =
 
             // lock the database in case we have to change it
         lock db (fun () ->
@@ -64,7 +64,7 @@ module private Remoting =
                     max first second
 
                     // combine inputs synchronously
-                return apply db oracle first second
+                return combine db oracle first second
             }
 
     /// Server API.
