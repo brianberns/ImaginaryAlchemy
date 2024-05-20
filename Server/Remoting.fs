@@ -6,7 +6,7 @@ open Fable.Remoting.Suave
 module private Remoting =
 
     /// Combines the given concepts using the given function.
-    let private apply db (combine : Combine) first second =
+    let private apply db combine first second =
 
             // lock the database in case we have to change it
         lock db (fun () ->
@@ -54,8 +54,7 @@ module private Remoting =
             // create and memoize an oracle
         let combine =
             Oracle.create dir
-                |> Oracle.combine
-                |> CombinationCache.create db
+                |> OracleCache.combine db
 
         fun (first, second) ->
             async {

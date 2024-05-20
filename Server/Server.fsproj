@@ -19,7 +19,7 @@
     <Compile Include="..\Shared\SharedTypes.fs" />
     <Compile Include="Oracle.fs" />
     <Compile Include="Data.fs" />
-    <Compile Include="CombinationCache.fs" />
+    <Compile Include="OracleCache.fs" />
     <Compile Include="Remoting.fs" />
     <Compile Include="App.fs" />
   </ItemGroup>

@@ -119,24 +119,26 @@ module Oracle =
             |> Option.orElseWith (test "es")
             |> Option.orElseWith (test "s")
 
+    /// Indicates whether the given parent concepts might
+    /// by validly combined.
+    let isValid oracle (first : Concept) (second : Concept) =
+        first < second
+            && oracle.ConceptSet.Contains(first)
+            && oracle.ConceptSet.Contains(second)
+
     /// Combines the given concepts, if possible.
-    let combine oracle (first : Concept) (second : Concept) =
+    let combine oracle first second =
+        assert(isValid oracle first second)
         option {
+                // combine concepts
+            let concept =
+                if first = "Fire" && second = "Water" then   // hard-coded example
+                    "Steam"
+                else
+                    infer oracle first second
 
-                // check for valid input
-            if first < second
-                && oracle.ConceptSet.Contains(first)
-                && oracle.ConceptSet.Contains(second) then
-
-                    // combine concepts
-                let concept =
-                    if first = "Fire" && second = "Water" then   // hard-coded example
-                        "Steam"
-                    else
-                        infer oracle first second
-
-                    // accept result?
-                let! concept' = tryFind oracle concept
-                if concept' <> first && concept' <> second then
-                    return concept'
+                // accept result?
+            let! concept' = tryFind oracle concept
+            if concept' <> first && concept' <> second then
+                return concept'
         }
