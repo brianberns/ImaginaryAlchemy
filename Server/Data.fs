@@ -16,6 +16,9 @@ type Database private =
 
         /// Command to insert/update a concept.
         UpsertConceptCmd : SqliteCommand
+
+        GetCombinationCmd : SqliteCommand
+        InsertCombinationCmd : SqliteCommand
     }
 
     interface IDisposable with
@@ -34,6 +37,13 @@ module Data =
      *   Fire   |          0 |       |
      *   Water  |          0 |       |
      *   Steam  |          1 | Fire	 | Water
+     *
+     * The Combination has one row for each combination that's been
+     * tried:
+     *
+     *  First | Second | Child
+     * -------+--------+-------
+     *  Fire  | Water  | Steam
      *)
 
     /// Creates a parameter for the given command.
@@ -61,7 +71,7 @@ module Data =
             cmd
 
             // command to insert/update a concept
-        let upsertCmd =
+        let upsertConceptCmd =
             let cmd =
                 conn.CreateCommand(
                     CommandText =
@@ -79,10 +89,37 @@ module Data =
             addParm "$Second" SqliteType.Text cmd
             cmd
 
+            // command to get a combination
+        let getCombinationCmd =
+            let cmd =
+                conn.CreateCommand(
+                    CommandText =
+                        "select Child \
+                        from Combination \
+                        where First = $First \
+                        and Second = $Second;")
+            addParm "$First" SqliteType.Text cmd
+            addParm "$Second" SqliteType.Text cmd
+            cmd
+
+            // command to insert a combination
+        let insertCombinationCmd =
+            let cmd =
+                conn.CreateCommand(
+                    CommandText =
+                        "insert into Combination (First, Second, Child, LastModified) \
+                        values ($First, $Second, $Child, datetime());")
+            addParm "$First" SqliteType.Text cmd
+            addParm "$Second" SqliteType.Text cmd
+            addParm "$Child" SqliteType.Text cmd
+            cmd
+
         {
             Connection = conn
             GetGenerationCmd = getGenCmd
-            UpsertConceptCmd = upsertCmd
+            UpsertConceptCmd = upsertConceptCmd
+            GetCombinationCmd = getCombinationCmd
+            InsertCombinationCmd = insertCombinationCmd
         }
 
     /// Fetches the generation number of the given concept,
