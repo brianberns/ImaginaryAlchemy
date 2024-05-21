@@ -1,5 +1,8 @@
 ﻿namespace ImaginaryAlchemy
 
+open System
+open System.IO
+
 open OpenAI
 open OpenAI.Managers
 open OpenAI.ObjectModels
@@ -22,7 +25,7 @@ module Program =
             Model = Models.Dall_e_2,
             N = 1,
             Size = "256x256",
-            ResponseFormat = "url")
+            ResponseFormat = "b64_json")
 
     let resp =
         service.Image
@@ -31,6 +34,8 @@ module Program =
 
     if resp.Successful then
         let result = Seq.exactlyOne resp.Results
-        printfn $"{result.Url}"
+        let bytes = Convert.FromBase64String(result.B64)
+        let path = $"water {DateTime.Now.Ticks}.png"
+        File.WriteAllBytes(path, bytes)
     else
         printfn $"{resp.Error.Message}"
