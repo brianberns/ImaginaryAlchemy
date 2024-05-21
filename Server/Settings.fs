@@ -14,7 +14,9 @@ module Settings =
 
     /// Gets settings from the given directory.
     let get dir =
-        let path = Path.Combine(dir, "appsettings.json")
+        let path =
+            Path.Combine(dir, "appsettings.json")
+                |> Path.GetFullPath
         ConfigurationBuilder()
             .AddJsonFile(path)
             .Build()
