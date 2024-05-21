@@ -12,7 +12,7 @@ module Program =
 
     [<Literal>]
     let private promptTemplate =
-        "Rounded edges square 3D icon of %s, subtle gradient, on a white background"
+        "Abstract, low detail, 2D icon of %s on a white background"
 
     let service =
         let settings = Settings.get @"..\..\..\..\Server\"
