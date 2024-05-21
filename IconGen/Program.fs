@@ -12,30 +12,33 @@ module Program =
 
     [<Literal>]
     let private promptTemplate =
-        "An icon of %s in light blue metallic iridescent material, 3D render isometric perspective on dark background"
+        "Rounded edges square 3D icon of %s, subtle gradient, on a white background"
 
     let service =
         let settings = Settings.get @"..\..\..\..\Server\"
         new OpenAIService(
             OpenAiOptions(ApiKey = settings.ApiKey))
 
-    let req =
-        let prompt = sprintf promptTemplate "water"
-        ImageCreateRequest(prompt,
-            Model = Models.Dall_e_2,
-            N = 1,
-            Size = "256x256",
-            ResponseFormat = "b64_json")
+    for concept in ["earth"; "air"; "fire"; "water"] do
 
-    let resp =
-        service.Image
-            .CreateImage(req)
-            .Result
+        let prompt = sprintf promptTemplate concept
+        let req =
+            ImageCreateRequest(prompt,
+                Model = Models.Dall_e_3,
+                N = 1,
+                Size = "1024x1024",
+                ResponseFormat = "b64_json")
 
-    if resp.Successful then
-        let result = Seq.exactlyOne resp.Results
-        let bytes = Convert.FromBase64String(result.B64)
-        let path = $"water {DateTime.Now.Ticks}.png"
-        File.WriteAllBytes(path, bytes)
-    else
-        printfn $"{resp.Error.Message}"
+        let resp =
+            service.Image
+                .CreateImage(req)
+                .Result
+
+        if resp.Successful then
+            let path = $"{prompt}.png"
+            let bytes =
+                let result = Seq.exactlyOne resp.Results
+                Convert.FromBase64String(result.B64)
+            File.WriteAllBytes(path, bytes)
+        else
+            printfn $"{resp.Error.Message}"
