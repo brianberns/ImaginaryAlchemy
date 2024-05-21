@@ -17,7 +17,9 @@ module DragData =
 
     /// Sets drag data for the given event.
     let private setData dragData (evt : DragEvent) =
-        evt.dataTransfer.setData("text/plain", "dummy")   // must call for iOS?
+        evt.dataTransfer.setData(   // must call for iOS?
+            "text/plain",
+            dragData.Concept)
             |> ignore
         shared <- Some dragData
 
