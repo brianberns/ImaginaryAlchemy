@@ -18290,7 +18290,6 @@ Cerambycidae
 ceramic
 ceramic ware
 ceramicist
-ceramics
 ceramist
 Cerapteryx
 Cerapteryx graminis
