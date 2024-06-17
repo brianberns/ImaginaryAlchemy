@@ -11,7 +11,7 @@
     <Compile Include="App.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Fable.Browser.Dom" Version="2.16.0" />
+    <PackageReference Include="Fable.Browser.Dom" Version="2.17.0" />
     <PackageReference Include="Fable.Core" Version="4.3.0" />
     <PackageReference Include="Fable.Remoting.Client" Version="7.32.0" />
     <PackageReference Include="Fable.Elmish.React" Version="4.0.0" />
