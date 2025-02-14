@@ -3,10 +3,10 @@
 open System
 open System.IO
 
-open OpenAI
-open OpenAI.Managers
-open OpenAI.ObjectModels
-open OpenAI.ObjectModels.RequestModels
+open Betalgo.Ranul.OpenAI
+open Betalgo.Ranul.OpenAI.Managers
+open Betalgo.Ranul.OpenAI.ObjectModels
+open Betalgo.Ranul.OpenAI.ObjectModels.RequestModels
 
 /// Inference oracle.
 type Oracle =
@@ -126,7 +126,7 @@ module Oracle =
         let service =
             let settings = Settings.get dir
             new OpenAIService(
-                OpenAiOptions(ApiKey = settings.ApiKey))
+                OpenAIOptions(ApiKey = settings.ApiKey))
 
             // load set of all possible concepts
             // https://www.reddit.com/r/learnprogramming/comments/4yoap9/large_word_list_of_english_nouns
