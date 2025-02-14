@@ -17,7 +17,7 @@ module Program =
                 settings.ApiKey, settings.Secret))
     let client = new RestClient(options)
 
-    for concept in [ "earth"; "air"; "fire"; "water" ] do
+    for concept in [ "island"; "poseidon" ] do
 
         let request =
             RestRequest("/v2/icon/")
@@ -26,4 +26,7 @@ module Program =
                 .AddQueryParameter("include_svg", "1")
         let response = client.ExecuteGet(request)
         let root = NounProject.Parse(response.Content)
-        printfn $"{concept}: {root.Icons[0].ThumbnailUrl}"
+        let icon = root.Icons[1]
+        printfn $"{concept}: {icon.ThumbnailUrl}"
+        for tag in icon.Tags do
+            printfn $"   {tag}"
