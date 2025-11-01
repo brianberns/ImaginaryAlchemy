@@ -52,7 +52,7 @@ module Oracle =
                     ResizeArray [
                         ChatMessage.FromUser(prompt)
                     ],
-                Model = Models.Gpt_4,
+                Model = "gpt-5-nano",
                 Temperature = 0.0f,
                 Seed = 0)
         let resp =
