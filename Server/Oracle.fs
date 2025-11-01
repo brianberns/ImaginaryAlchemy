@@ -30,7 +30,7 @@ module Oracle =
     /// GPT prompt template.
     [<Literal>]
     let private promptTemplate =
-        """The following is a list of imaginary alchemy experiments. Each experiment combines two concepts into a new concept. The new concept is always a singular noun.
+        """The following is a list of imaginary alchemy experiments. Each experiment combines two concepts into a new concept. The new concept is always a singular noun with no further explanation.
 > Fire + Water = Steam
 > %s + %s = """
 
@@ -53,7 +53,6 @@ module Oracle =
                         ChatMessage.FromUser(prompt)
                     ],
                 Model = "gpt-5-nano",
-                Temperature = 0.0f,
                 Seed = 0)
         let resp =
             service
