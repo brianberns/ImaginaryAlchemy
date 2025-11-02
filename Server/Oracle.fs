@@ -53,6 +53,7 @@ module Oracle =
                         ChatMessage.FromUser(prompt)
                     ],
                 Model = "gpt-4o-mini",
+                Temperature = 0.0f,
                 Seed = 0)
         let resp =
             service
