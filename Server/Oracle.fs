@@ -30,7 +30,7 @@ module Oracle =
     /// GPT prompt template.
     [<Literal>]
     let private promptTemplate =
-        """The following is a list of imaginary alchemy experiments. Each experiment combines two concepts into a new concept. The new concept is always a singular noun with no further explanation.
+        """The following is a list of imaginary alchemy experiments. Each experiment combines two concepts into a new concept whimsically. The new concept is always a singular noun or two-word noun phrase.
 > Fire + Water = Steam
 > %s + %s = """
 
