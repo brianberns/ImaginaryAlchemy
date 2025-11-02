@@ -52,7 +52,7 @@ module Oracle =
                     ResizeArray [
                         ChatMessage.FromUser(prompt)
                     ],
-                Model = "gpt-5-nano",
+                Model = "gpt-4o-mini",
                 Seed = 0)
         let resp =
             service
